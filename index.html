@@ -885,15 +885,6 @@
                 tbody.appendChild(tr);
             });
             refreshIcons();
-
-            // Bind click event for delete buttons
-            tbody.querySelectorAll('.btn-delete-log').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const logId = e.currentTarget.dataset.id;
-                    deleteLog(logId);
-                });
-            });
             
             // Re-apply filters if inputs have values
             filterReports();
@@ -1355,7 +1346,24 @@
                 }
             });
 
-            doc.save(`join_logs_${Date.now()}.pdf`);
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+
+            doc.save(`INCFH-${dateStr}-Attendance.pdf`);
+        });
+
+        // Table body click delegation for delete buttons
+        document.getElementById('reports-table-body').addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-delete-log');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const logId = btn.dataset.id;
+                deleteLog(logId);
+            }
         });
 
         document.getElementById('logs-search').addEventListener('input', filterReports);
