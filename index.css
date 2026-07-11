@@ -1475,3 +1475,168 @@ td {
         align-items: flex-end;
     }
 }
+
+/* Reminder Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-normal), visibility var(--transition-normal);
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Card */
+.modal-card {
+    background-color: var(--color-bg-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--color-border);
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    overflow: hidden;
+    transform: translateY(20px) scale(0.95);
+    transition: transform var(--transition-slow);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-overlay.show .modal-card {
+    transform: translateY(0) scale(1);
+}
+
+.modal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--color-indigo), var(--color-primary));
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 32px 32px 20px 32px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.modal-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary-glow);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text-title);
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.modal-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 0 32px 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.reminder-step-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.reminder-step-item:hover {
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
+}
+
+.step-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-indigo);
+    background-color: var(--color-indigo-glow);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+}
+
+.step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.step-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-title);
+}
+
+.step-text {
+    font-size: 0.875rem;
+    color: var(--color-text-main);
+    line-height: 1.4;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 0 32px 32px 32px;
+}
+
+@media (max-width: 480px) {
+    .modal-header {
+        padding: 24px 20px 16px 20px;
+    }
+    .modal-body {
+        padding: 0 20px 20px 20px;
+    }
+    .modal-footer {
+        padding: 0 20px 24px 20px;
+    }
+    .modal-title {
+        font-size: 1.25rem;
+    }
+    .reminder-step-item {
+        padding: 12px;
+        gap: 12px;
+    }
+}
+
