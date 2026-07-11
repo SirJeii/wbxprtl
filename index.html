@@ -7,9 +7,10 @@
     <title>WebEx Join Portal</title>
     <link rel="stylesheet" href="index.css?v=3">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- PDF Export Libraries -->
+    <!-- PDF & ZIP Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 
 <body>
@@ -329,11 +330,17 @@
                             <input type="text" id="logs-search" class="search-input" placeholder="Search Name or Lokal...">
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            <select id="logs-filter-lokal" class="search-input" style="padding-left: 12px; padding-right: 32px; max-width: 180px; appearance: none; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; cursor: pointer;" title="Filter by Lokal">
+                                <option value="">All Lokals</option>
+                            </select>
                             <input type="date" id="logs-date-start" class="search-input" style="padding-left: 12px; max-width: 145px;" title="Start Date">
                             <span style="color: var(--color-text-muted); font-size: 0.875rem;">to</span>
                             <input type="date" id="logs-date-end" class="search-input" style="padding-left: 12px; max-width: 145px;" title="End Date">
                             <button id="btn-export-pdf" class="btn btn-primary" style="padding: 10px 16px; font-size: 0.875rem; width: auto; background-color: var(--color-indigo); border-color: var(--color-indigo);">
                                 <i data-lucide="file-text" class="w-4 h-4"></i> Export PDF
+                            </button>
+                            <button id="btn-export-zip" class="btn btn-primary" style="padding: 10px 16px; font-size: 0.875rem; width: auto; background-color: var(--color-success); border-color: var(--color-success);" title="Download separated PDF reports for each Lokal inside a ZIP archive">
+                                <i data-lucide="folder-archive" class="w-4 h-4"></i> Export ZIP
                             </button>
                             <button id="btn-export-csv" class="btn btn-secondary" style="padding: 10px 16px; font-size: 0.875rem; width: auto;">
                                 <i data-lucide="download" class="w-4 h-4"></i> Export CSV
@@ -832,6 +839,21 @@
             
             // Update Stats widget in Admin Dashboard
             document.getElementById('widget-total-lokals').textContent = appLokals.length;
+            updateLogsLokalFilterDropdown();
+        }
+
+        function updateLogsLokalFilterDropdown() {
+            const select = document.getElementById('logs-filter-lokal');
+            if (!select) return;
+            const currentSelected = select.value;
+            select.innerHTML = '<option value="">All Lokals</option>';
+            appLokals.forEach(lokal => {
+                const opt = document.createElement('option');
+                opt.value = lokal.name;
+                opt.textContent = lokal.name;
+                select.appendChild(opt);
+            });
+            select.value = currentSelected;
         }
 
         function updateReportsUI() {
@@ -1171,6 +1193,7 @@
             const query = document.getElementById('logs-search').value.toLowerCase().trim();
             const startVal = document.getElementById('logs-date-start').value;
             const endVal = document.getElementById('logs-date-end').value;
+            const filterLokal = document.getElementById('logs-filter-lokal').value;
             
             const startDate = startVal ? new Date(startVal + "T00:00:00") : null;
             const endDate = endVal ? new Date(endVal + "T23:59:59") : null;
@@ -1181,15 +1204,16 @@
 
             rows.forEach(row => {
                 const name = row.dataset.name ? row.dataset.name.toLowerCase() : '';
-                const lokal = row.dataset.lokal ? row.dataset.lokal.toLowerCase() : '';
+                const lokal = row.dataset.lokal ? row.dataset.lokal : '';
                 const timestamp = parseInt(row.dataset.timestamp);
                 const rowDate = new Date(timestamp);
 
-                let matchesSearch = !query || name.includes(query) || lokal.includes(query);
+                let matchesSearch = !query || name.includes(query) || lokal.toLowerCase().includes(query);
+                let matchesLokal = !filterLokal || lokal === filterLokal;
                 let matchesStart = !startDate || rowDate >= startDate;
                 let matchesEnd = !endDate || rowDate <= endDate;
 
-                if (matchesSearch && matchesStart && matchesEnd) {
+                if (matchesSearch && matchesLokal && matchesStart && matchesEnd) {
                     row.classList.remove('hidden');
                     visibleCount++;
                 } else {
@@ -1214,20 +1238,22 @@
             const query = document.getElementById('logs-search').value.toLowerCase().trim();
             const startVal = document.getElementById('logs-date-start').value;
             const endVal = document.getElementById('logs-date-end').value;
+            const filterLokal = document.getElementById('logs-filter-lokal').value;
             
             const startDate = startVal ? new Date(startVal + "T00:00:00") : null;
             const endDate = endVal ? new Date(endVal + "T23:59:59") : null;
 
             return appReports.filter(log => {
                 const name = `${log.firstName} ${log.surname} ${log.generatedName}`.toLowerCase();
-                const lokal = log.lokal ? log.lokal.toLowerCase() : '';
+                const lokal = log.lokal || '';
                 const logDate = log.timestamp ? new Date(log.timestamp) : new Date(0);
 
-                let matchesSearch = !query || name.includes(query) || lokal.includes(query);
+                let matchesSearch = !query || name.includes(query) || lokal.toLowerCase().includes(query);
+                let matchesLokal = !filterLokal || lokal === filterLokal;
                 let matchesStart = !startDate || logDate >= startDate;
                 let matchesEnd = !endDate || logDate <= endDate;
 
-                return matchesSearch && matchesStart && matchesEnd;
+                return matchesSearch && matchesLokal && matchesStart && matchesEnd;
             });
         }
 
@@ -1295,56 +1321,81 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4'); // landscape, millimeters, A4 size
 
-            // Document Title & Styling
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(20);
-            doc.setTextColor(15, 23, 42); // slate-900
-            doc.text("WebEx Join Portal - Official Join Logs", 14, 20);
-
-            doc.setFont("Helvetica", "normal");
-            doc.setFontSize(10);
-            doc.setTextColor(100, 116, 139); // slate-500
-            doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 26);
-            doc.text(`Total Records: ${filtered.length}`, 14, 31);
-
-            // Table Headers & Rows
-            const headers = [["Timestamp", "Generated Meeting Name", "User Full Name", "Lokal Name", "Purok", "Grupo"]];
-            const data = filtered.map(log => [
-                log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
-                log.generatedName || '',
-                `${log.firstName} ${log.surname} ${log.suffix || ''}`.trim(),
-                log.lokal || '',
-                log.purok || '',
-                log.grupo || ''
-            ]);
-
-            doc.autoTable({
-                startY: 36,
-                head: headers,
-                body: data,
-                theme: 'striped',
-                headStyles: {
-                    fillColor: [59, 130, 246], // primary blue color
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold'
-                },
-                alternateRowStyles: {
-                    fillColor: [248, 250, 252] // base bg color
-                },
-                styles: {
-                    fontSize: 9,
-                    font: 'Helvetica',
-                    cellPadding: 4
-                },
-                columnStyles: {
-                    0: { cellWidth: 45 }, // Timestamp
-                    1: { cellWidth: 85 }, // Generated Meeting Name
-                    2: { cellWidth: 55 }, // User Full Name
-                    3: { cellWidth: 45 }, // Lokal Name
-                    4: { cellWidth: 20, halign: 'center' }, // Purok
-                    5: { cellWidth: 20, halign: 'center' }  // Grupo
-                }
+            // Group filtered records by Lokal
+            const groups = {};
+            filtered.forEach(log => {
+                const lName = log.lokal || 'Unknown Lokal';
+                if (!groups[lName]) groups[lName] = [];
+                groups[lName].push(log);
             });
+
+            const sortedLokalNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+            sortedLokalNames.forEach((lokalName, index) => {
+                if (index > 0) {
+                    doc.addPage();
+                }
+
+                // Header for this Lokal's section/page
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(18);
+                doc.setTextColor(30, 58, 138); // navy blue
+                doc.text(`Lokal: ${lokalName}`, 14, 20);
+
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(10);
+                doc.setTextColor(100, 116, 139); // slate-500
+                doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 26);
+                doc.text(`Total Attendees: ${groups[lokalName].length}`, 14, 31);
+
+                // Table Headers & Rows for this specific Lokal (no need for Lokal Name column)
+                const headers = [["Timestamp", "Generated Meeting Name", "User Full Name", "Purok", "Grupo"]];
+                const data = groups[lokalName].map(log => [
+                    log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
+                    log.generatedName || '',
+                    `${log.firstName} ${log.surname} ${log.suffix || ''}`.trim(),
+                    log.purok || '',
+                    log.grupo || ''
+                ]);
+
+                doc.autoTable({
+                    startY: 36,
+                    head: headers,
+                    body: data,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [30, 58, 138], // primary dark blue
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [243, 244, 246] // light gray
+                    },
+                    styles: {
+                        fontSize: 9,
+                        font: 'Helvetica',
+                        cellPadding: 4
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 50 }, // Timestamp
+                        1: { cellWidth: 110 }, // Generated Meeting Name
+                        2: { cellWidth: 70 }, // User Full Name
+                        3: { cellWidth: 20, halign: 'center' }, // Purok
+                        4: { cellWidth: 20, halign: 'center' }  // Grupo
+                    }
+                });
+            });
+
+            // Add page numbers at the bottom of all pages
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(8);
+                doc.setTextColor(100, 116, 139); // slate-500
+                doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
+                doc.text("WebEx Join Portal Attendance Report", 14, doc.internal.pageSize.height - 10);
+            }
 
             const today = new Date();
             const year = today.getFullYear();
@@ -1352,7 +1403,137 @@
             const day = String(today.getDate()).padStart(2, '0');
             const dateStr = `${year}-${month}-${day}`;
 
-            doc.save(`INCFH-${dateStr}-Attendance.pdf`);
+            const filterLokal = document.getElementById('logs-filter-lokal').value;
+            const filenameLokalPart = filterLokal ? filterLokal.replace(/\s+/g, '_') : 'All_Lokals';
+            const filename = `INCFH-${dateStr}-${filenameLokalPart}-Attendance.pdf`;
+
+            doc.save(filename);
+        });
+
+        // ZIP Export functionality (Individual PDFs per Lokal zipped)
+        document.getElementById('btn-export-zip').addEventListener('click', async () => {
+            const filtered = getFilteredReports();
+            if (filtered.length === 0) {
+                alert("No reports available to export.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-export-zip');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4" style="animation: spin 1s infinite linear; display: inline-block;"></i> Zipping...';
+            btn.disabled = true;
+            refreshIcons();
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const zip = new JSZip();
+
+                // Group filtered records by Lokal
+                const groups = {};
+                filtered.forEach(log => {
+                    const lName = log.lokal || 'Unknown Lokal';
+                    if (!groups[lName]) groups[lName] = [];
+                    groups[lName].push(log);
+                });
+
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+
+                const sortedLokalNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+                sortedLokalNames.forEach(lokalName => {
+                    const doc = new jsPDF('l', 'mm', 'a4'); // landscape, A4
+
+                    // Header for this Lokal's PDF
+                    doc.setFont("Helvetica", "bold");
+                    doc.setFontSize(18);
+                    doc.setTextColor(30, 58, 138); // navy blue
+                    doc.text(`Lokal: ${lokalName}`, 14, 20);
+
+                    doc.setFont("Helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.setTextColor(100, 116, 139); // slate-500
+                    doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 26);
+                    doc.text(`Total Attendees: ${groups[lokalName].length}`, 14, 31);
+
+                    // Table Headers & Rows for this specific Lokal (no need for Lokal Name column)
+                    const headers = [["Timestamp", "Generated Meeting Name", "User Full Name", "Purok", "Grupo"]];
+                    const data = groups[lokalName].map(log => [
+                        log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
+                        log.generatedName || '',
+                        `${log.firstName} ${log.surname} ${log.suffix || ''}`.trim(),
+                        log.purok || '',
+                        log.grupo || ''
+                    ]);
+
+                    doc.autoTable({
+                        startY: 36,
+                        head: headers,
+                        body: data,
+                        theme: 'striped',
+                        headStyles: {
+                            fillColor: [30, 58, 138], // primary dark blue
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold'
+                        },
+                        alternateRowStyles: {
+                            fillColor: [243, 244, 246] // light gray
+                        },
+                        styles: {
+                            fontSize: 9,
+                            font: 'Helvetica',
+                            cellPadding: 4
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 50 }, // Timestamp
+                            1: { cellWidth: 110 }, // Generated Meeting Name
+                            2: { cellWidth: 70 }, // User Full Name
+                            3: { cellWidth: 20, halign: 'center' }, // Purok
+                            4: { cellWidth: 20, halign: 'center' }  // Grupo
+                        }
+                    });
+
+                    // Add page numbers at the bottom of all pages for this specific Lokal PDF
+                    const pageCount = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        doc.setFont("Helvetica", "normal");
+                        doc.setFontSize(8);
+                        doc.setTextColor(100, 116, 139); // slate-500
+                        doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
+                        doc.text("WebEx Join Portal Attendance Report", 14, doc.internal.pageSize.height - 10);
+                    }
+
+                    // Output as Blob
+                    const pdfBlob = doc.output('blob');
+                    const cleanLokalName = lokalName.replace(/\s+/g, '_');
+                    zip.file(`INCFH-${dateStr}-${cleanLokalName}-Attendance.pdf`, pdfBlob);
+                });
+
+                const content = await zip.generateAsync({ type: "blob" });
+                
+                const url = URL.createObjectURL(content);
+                const link = document.createElement("a");
+                link.href = url;
+                
+                const filterLokal = document.getElementById('logs-filter-lokal').value;
+                const filenameLokalPart = filterLokal ? filterLokal.replace(/\s+/g, '_') : 'All_Lokals';
+                link.download = `INCFH-${dateStr}-${filenameLokalPart}-Reports.zip`;
+                
+                link.click();
+                URL.revokeObjectURL(url);
+                showToast("ZIP export completed!");
+            } catch (err) {
+                console.error("ZIP Generation error:", err);
+                alert("Failed to generate ZIP archive.");
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                refreshIcons();
+            }
         });
 
         // Table body click delegation for delete buttons
@@ -1367,6 +1548,7 @@
         });
 
         document.getElementById('logs-search').addEventListener('input', filterReports);
+        document.getElementById('logs-filter-lokal').addEventListener('change', filterReports);
         document.getElementById('logs-date-start').addEventListener('change', filterReports);
         document.getElementById('logs-date-end').addEventListener('change', filterReports);
 
