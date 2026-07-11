@@ -7,6 +7,9 @@
     <title>WebEx Join Portal</title>
     <link rel="stylesheet" href="index.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PDF Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
@@ -346,8 +349,14 @@
                             <input type="date" id="logs-date-start" class="search-input" style="padding-left: 12px; max-width: 145px;" title="Start Date">
                             <span style="color: var(--color-text-muted); font-size: 0.875rem;">to</span>
                             <input type="date" id="logs-date-end" class="search-input" style="padding-left: 12px; max-width: 145px;" title="End Date">
+                            <button id="btn-export-pdf" class="btn btn-primary" style="padding: 10px 16px; font-size: 0.875rem; width: auto; background-color: var(--color-indigo); border-color: var(--color-indigo);">
+                                <i data-lucide="file-text" class="w-4 h-4"></i> Export PDF
+                            </button>
                             <button id="btn-export-csv" class="btn btn-secondary" style="padding: 10px 16px; font-size: 0.875rem; width: auto;">
                                 <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+                            </button>
+                            <button id="btn-delete-all-logs" class="btn btn-danger" style="padding: 10px 16px; font-size: 0.875rem; width: auto;">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> Clear Logs
                             </button>
                         </div>
                     </div>
@@ -362,11 +371,12 @@
                                         <th>Meeting Name</th>
                                         <th>User Details</th>
                                         <th>Lokal Info</th>
+                                        <th style="width: 80px; text-align: center;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="reports-table-body">
                                     <tr class="table-loading-row">
-                                        <td colspan="4">
+                                        <td colspan="5">
                                             <i data-lucide="loader" class="w-5 h-5" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Loading reports...
                                         </td>
                                     </tr>
@@ -381,6 +391,60 @@
 
     </main>
 
+    <!-- Reminder Modal -->
+    <div id="reminder-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-icon-wrapper">
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 class="modal-title">Mahahalagang Paalala</h2>
+                    <p class="modal-subtitle">Bago magpatuloy sa registration portal</p>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="reminder-step-item">
+                    <div class="modal-icon-wrapper" style="width: 40px; height: 40px; background-color: var(--color-indigo-glow); color: var(--color-indigo);">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-badge" style="width: fit-content;">Paalala 1</span>
+                        <p class="step-text" style="margin-top: 6px; font-weight: 500;">I-reinstall ang WebEx sa device para matiyak na updated ang app.</p>
+                    </div>
+                </div>
+
+                <div class="reminder-step-item">
+                    <div class="modal-icon-wrapper" style="width: 40px; height: 40px; background-color: var(--color-indigo-glow); color: var(--color-indigo);">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-badge" style="width: fit-content;">Paalala 2</span>
+                        <p class="step-text" style="margin-top: 6px; font-weight: 500;">Matiyak na palaging naka-on ang camera at naka-mute ang mic sa buong panahon ng aktibidad.</p>
+                    </div>
+                </div>
+
+                <div class="reminder-step-item">
+                    <div class="modal-icon-wrapper" style="width: 40px; height: 40px; background-color: var(--color-indigo-glow); color: var(--color-indigo);">
+                        <i data-lucide="shirt" class="w-5 h-5"></i>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-badge" style="width: fit-content;">Paalala 3</span>
+                        <p class="step-text" style="margin-top: 6px; font-weight: 500;">Maging maayos ang kasuotan sa pagdalo sa aktibidad.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="btn-close-reminder" class="btn btn-primary" style="width: 100%;">
+                    <span>Naiintindihan ko at Magpapatuloy</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast-notification" class="toast-container">
         <i data-lucide="check-circle" class="w-5 h-5"></i>
@@ -391,7 +455,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const refreshIcons = () => lucide.createIcons();
         refreshIcons();
@@ -636,15 +700,35 @@
         });
 
         // ==========================================
-        // FIREBASE CONNECTIVITY
+        // FIREBASE CONNECTIVITY & INITIAL LOADING
         // ==========================================
+        let isInitialLoad = true;
+
+        function dismissLoadingAndShowReminder() {
+            if (!isInitialLoad) return;
+            isInitialLoad = false;
+            document.getElementById('loading-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('reminder-modal').classList.add('show');
+            }, 300);
+        }
+
+        // 3-second fallback to ensure the app loads even if Firebase is slow or offline
+        setTimeout(() => {
+            if (isInitialLoad) {
+                console.warn("Firebase load fallback timeout reached.");
+                dismissLoadingAndShowReminder();
+            }
+        }, 3000);
+
         async function initAuth() {
             try {
                 // Force anonymous login directly to your custom Firebase project
                 await signInAnonymously(auth);
             } catch (err) {
                 console.error("Auth Error:", err);
-                document.getElementById('loading-overlay').classList.add('hidden');
+                dismissLoadingAndShowReminder();
             }
         }
 
@@ -662,8 +746,10 @@
                     appSettings = snap.data();
                     updateSettingsUI();
                 }
-                document.getElementById('loading-overlay').style.opacity = '0';
-                setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
+                dismissLoadingAndShowReminder();
+            }, (error) => {
+                console.error("Settings snapshot error:", error);
+                dismissLoadingAndShowReminder();
             });
 
             const lokalsRef = doc(db, 'artifacts', appId, 'public', 'data', 'lokals', 'list');
@@ -763,7 +849,7 @@
             tbody.innerHTML = '';
             
             if (appReports.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No join logs available yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No join logs available yet.</td></tr>';
                 return;
             }
             
@@ -790,10 +876,24 @@
                             <span class="td-purok-grupo-badge">Purok ${log.purok} &bull; Grupo ${log.grupo}</span>
                         </div>
                     </td>
+                    <td data-label="Actions" style="text-align: center;">
+                        <button type="button" class="btn-remove-icon btn-delete-log" data-id="${log.id}" title="Delete Log">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
             refreshIcons();
+
+            // Bind click event for delete buttons
+            tbody.querySelectorAll('.btn-delete-log').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const logId = e.currentTarget.dataset.id;
+                    deleteLog(logId);
+                });
+            });
             
             // Re-apply filters if inputs have values
             filterReports();
@@ -859,6 +959,10 @@
             document.getElementById('btn-copy').classList.remove('copied');
             document.getElementById('icon-copy').setAttribute('data-lucide', 'copy');
             refreshIcons();
+        });
+
+        document.getElementById('btn-close-reminder').addEventListener('click', () => {
+            document.getElementById('reminder-modal').classList.remove('show');
         });
 
         function showToast(message) {
@@ -1107,13 +1211,152 @@
                 if (!noLogsRow) {
                     const tr = document.createElement('tr');
                     tr.className = 'no-logs-row';
-                    tr.innerHTML = `<td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No logs match the filters.</td>`;
+                    tr.innerHTML = `<td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No logs match the filters.</td>`;
                     tbody.appendChild(tr);
                 }
             } else if (noLogsRow) {
                 noLogsRow.remove();
             }
         }
+
+        function getFilteredReports() {
+            const query = document.getElementById('logs-search').value.toLowerCase().trim();
+            const startVal = document.getElementById('logs-date-start').value;
+            const endVal = document.getElementById('logs-date-end').value;
+            
+            const startDate = startVal ? new Date(startVal + "T00:00:00") : null;
+            const endDate = endVal ? new Date(endVal + "T23:59:59") : null;
+
+            return appReports.filter(log => {
+                const name = `${log.firstName} ${log.surname} ${log.generatedName}`.toLowerCase();
+                const lokal = log.lokal ? log.lokal.toLowerCase() : '';
+                const logDate = log.timestamp ? new Date(log.timestamp) : new Date(0);
+
+                let matchesSearch = !query || name.includes(query) || lokal.includes(query);
+                let matchesStart = !startDate || logDate >= startDate;
+                let matchesEnd = !endDate || logDate <= endDate;
+
+                return matchesSearch && matchesStart && matchesEnd;
+            });
+        }
+
+        async function deleteLog(id) {
+            if (!currentUser) return;
+            if (!confirm("Are you sure you want to delete this log?")) return;
+
+            try {
+                const logRef = doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', id);
+                await deleteDoc(logRef);
+                showToast("Log successfully deleted!");
+            } catch (err) {
+                console.error("Delete log error:", err);
+                alert("Failed to delete log.");
+            }
+        }
+
+        async function deleteAllLogs() {
+            if (!currentUser) return;
+            const filtered = getFilteredReports();
+            if (filtered.length === 0) {
+                alert("No logs available to delete.");
+                return;
+            }
+
+            const confirmMsg = document.getElementById('logs-search').value.trim() || document.getElementById('logs-date-start').value || document.getElementById('logs-date-end').value
+                ? `Are you sure you want to delete the ${filtered.length} FILTERED logs currently shown?`
+                : `Are you sure you want to delete ALL ${appReports.length} logs? This cannot be undone!`;
+
+            if (!confirm(confirmMsg)) return;
+
+            const btn = document.getElementById('btn-delete-all-logs');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4" style="animation: spin 1s infinite linear; display: inline-block;"></i> Deleting...';
+            btn.disabled = true;
+            refreshIcons();
+
+            try {
+                const deletePromises = filtered.map(log => {
+                    const logRef = doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', log.id);
+                    return deleteDoc(logRef);
+                });
+                await Promise.all(deletePromises);
+                showToast("Logs successfully deleted!");
+            } catch (err) {
+                console.error("Delete all logs error:", err);
+                alert("Failed to clear logs.");
+            }
+
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            refreshIcons();
+        }
+
+        document.getElementById('btn-delete-all-logs').addEventListener('click', deleteAllLogs);
+
+        // PDF Export functionality
+        document.getElementById('btn-export-pdf').addEventListener('click', () => {
+            const filtered = getFilteredReports();
+            if (filtered.length === 0) {
+                alert("No reports available to export.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // landscape, millimeters, A4 size
+
+            // Document Title & Styling
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(20);
+            doc.setTextColor(15, 23, 42); // slate-900
+            doc.text("WebEx Join Portal - Official Join Logs", 14, 20);
+
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(100, 116, 139); // slate-500
+            doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 26);
+            doc.text(`Total Records: ${filtered.length}`, 14, 31);
+
+            // Table Headers & Rows
+            const headers = [["Timestamp", "Generated Meeting Name", "User Full Name", "Lokal Name", "Purok", "Grupo"]];
+            const data = filtered.map(log => [
+                log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
+                log.generatedName || '',
+                `${log.firstName} ${log.surname} ${log.suffix || ''}`.trim(),
+                log.lokal || '',
+                log.purok || '',
+                log.grupo || ''
+            ]);
+
+            doc.autoTable({
+                startY: 36,
+                head: headers,
+                body: data,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [59, 130, 246], // primary blue color
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252] // base bg color
+                },
+                styles: {
+                    fontSize: 9,
+                    font: 'Helvetica',
+                    cellPadding: 4
+                },
+                columnStyles: {
+                    0: { cellWidth: 45 }, // Timestamp
+                    1: { cellWidth: 85 }, // Generated Meeting Name
+                    2: { cellWidth: 55 }, // User Full Name
+                    3: { cellWidth: 45 }, // Lokal Name
+                    4: { cellWidth: 20, halign: 'center' }, // Purok
+                    5: { cellWidth: 20, halign: 'center' }  // Grupo
+                }
+            });
+
+            doc.save(`join_logs_${Date.now()}.pdf`);
+        });
 
         document.getElementById('logs-search').addEventListener('input', filterReports);
         document.getElementById('logs-date-start').addEventListener('change', filterReports);
