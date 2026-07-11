@@ -89,29 +89,12 @@
                             <label for="inp-purok">Purok *</label>
                             <select required id="inp-purok" class="input-field">
                                 <option value="" disabled selected>Select</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="inp-grupo">Grupo *</label>
                             <select required id="inp-grupo" class="input-field">
                                 <option value="" disabled selected>Select</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
-                                <option value="11">11</option>
-                                <option value="12">12</option>
                             </select>
                         </div>
                     </div>
@@ -459,6 +442,23 @@
 
         const refreshIcons = () => lucide.createIcons();
         refreshIcons();
+
+        // Populate Purok and Grupo options up to 50
+        const purokSelect = document.getElementById('inp-purok');
+        const grupoSelect = document.getElementById('inp-grupo');
+        if (purokSelect && grupoSelect) {
+            for (let i = 1; i <= 50; i++) {
+                const optP = document.createElement('option');
+                optP.value = i;
+                optP.textContent = i;
+                purokSelect.appendChild(optP);
+
+                const optG = document.createElement('option');
+                optG.value = i;
+                optG.textContent = i;
+                grupoSelect.appendChild(optG);
+            }
+        }
 
         // LIVE FIREBASE CONFIGURATION
         const firebaseConfig = {
