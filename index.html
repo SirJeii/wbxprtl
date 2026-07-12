@@ -1331,10 +1331,53 @@
 
             const sortedLokalNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
 
-            sortedLokalNames.forEach((lokalName, index) => {
-                if (index > 0) {
-                    doc.addPage();
+            // Page 1: Attendance Summary by Lokal
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(20);
+            doc.setTextColor(30, 58, 138); // navy blue
+            doc.text("WebEx Join Portal - Attendance Summary", 14, 22);
+
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(100, 116, 139); // slate-500
+            doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 30);
+            doc.text(`Total Lokals: ${sortedLokalNames.length}`, 14, 35);
+            doc.text(`Total Attendees Joined: ${filtered.length}`, 14, 40);
+
+            // Summary Table Headers & Rows
+            const summaryHeaders = [["Lokal Name", "Total Attendees Joined"]];
+            const summaryData = sortedLokalNames.map(lokalName => [
+                lokalName,
+                groups[lokalName].length.toString()
+            ]);
+
+            doc.autoTable({
+                startY: 46,
+                head: summaryHeaders,
+                body: summaryData,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [30, 58, 138], // primary dark blue
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [243, 244, 246] // light gray
+                },
+                styles: {
+                    fontSize: 10,
+                    font: 'Helvetica',
+                    cellPadding: 5
+                },
+                columnStyles: {
+                    0: { cellWidth: 150 }, // Lokal Name
+                    1: { cellWidth: 50, halign: 'center' } // Total Attendees Joined
                 }
+            });
+
+            // Subsequent Pages: Detailed Attendance per Lokal
+            sortedLokalNames.forEach((lokalName) => {
+                doc.addPage();
 
                 // Header for this Lokal's section/page
                 doc.setFont("Helvetica", "bold");
@@ -1410,7 +1453,7 @@
             doc.save(filename);
         });
 
-        // ZIP Export functionality (Individual PDFs per Lokal zipped)
+        // ZIP Export functionality (Individual PDFs per Lokal zipped + a Summary PDF)
         document.getElementById('btn-export-zip').addEventListener('click', async () => {
             const filtered = getFilteredReports();
             if (filtered.length === 0) {
@@ -1444,6 +1487,65 @@
 
                 const sortedLokalNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
 
+                // 1. Generate and add a separate Summary PDF to the ZIP archive
+                const summaryDoc = new jsPDF('l', 'mm', 'a4');
+                summaryDoc.setFont("Helvetica", "bold");
+                summaryDoc.setFontSize(20);
+                summaryDoc.setTextColor(30, 58, 138); // navy blue
+                summaryDoc.text("WebEx Join Portal - Attendance Summary", 14, 22);
+
+                summaryDoc.setFont("Helvetica", "normal");
+                summaryDoc.setFontSize(10);
+                summaryDoc.setTextColor(100, 116, 139); // slate-500
+                summaryDoc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 30);
+                summaryDoc.text(`Total Lokals: ${sortedLokalNames.length}`, 14, 35);
+                summaryDoc.text(`Total Attendees Joined: ${filtered.length}`, 14, 40);
+
+                const summaryHeaders = [["Lokal Name", "Total Attendees Joined"]];
+                const summaryData = sortedLokalNames.map(lokalName => [
+                    lokalName,
+                    groups[lokalName].length.toString()
+                ]);
+
+                summaryDoc.autoTable({
+                    startY: 46,
+                    head: summaryHeaders,
+                    body: summaryData,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [30, 58, 138], // primary dark blue
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [243, 244, 246] // light gray
+                    },
+                    styles: {
+                        fontSize: 10,
+                        font: 'Helvetica',
+                        cellPadding: 5
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 150 }, // Lokal Name
+                        1: { cellWidth: 50, halign: 'center' } // Total Attendees Joined
+                    }
+                });
+
+                // Add footer page numbers for the summary document
+                const summaryPageCount = summaryDoc.internal.getNumberOfPages();
+                for (let i = 1; i <= summaryPageCount; i++) {
+                    summaryDoc.setPage(i);
+                    summaryDoc.setFont("Helvetica", "normal");
+                    summaryDoc.setFontSize(8);
+                    summaryDoc.setTextColor(100, 116, 139); // slate-500
+                    summaryDoc.text(`Page ${i} of ${summaryPageCount}`, summaryDoc.internal.pageSize.width - 25, summaryDoc.internal.pageSize.height - 10);
+                    summaryDoc.text("WebEx Join Portal Attendance Summary Report", 14, summaryDoc.internal.pageSize.height - 10);
+                }
+
+                const summaryPdfBlob = summaryDoc.output('blob');
+                zip.file(`INCFH-${dateStr}-Summary.pdf`, summaryPdfBlob);
+
+                // 2. Generate individual PDFs per Lokal and add to ZIP
                 sortedLokalNames.forEach(lokalName => {
                     const doc = new jsPDF('l', 'mm', 'a4'); // landscape, A4
 
