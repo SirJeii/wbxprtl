@@ -955,8 +955,21 @@
             if (passEl) passEl.textContent = selectedLokalConfig.password || 'N/A';
 
             try {
-                const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'join_logs');
-                await addDoc(logsRef, { ...formData, generatedName: finalName, timestamp: Date.now(), userId: currentUser.uid });
+                const existingLog = appReports.find(log => 
+                    log.firstName && log.surname && log.lokal &&
+                    log.firstName.toLowerCase().trim() === formData.firstName.toLowerCase().trim() &&
+                    log.surname.toLowerCase().trim() === formData.surname.toLowerCase().trim() &&
+                    (log.suffix || '').toLowerCase().trim() === formData.suffix.toLowerCase().trim() &&
+                    log.lokal.toLowerCase().trim() === formData.lokal.toLowerCase().trim()
+                );
+
+                if (existingLog) {
+                    const logDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', existingLog.id);
+                    await setDoc(logDocRef, { ...formData, generatedName: finalName, timestamp: Date.now(), userId: currentUser.uid });
+                } else {
+                    const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'join_logs');
+                    await addDoc(logsRef, { ...formData, generatedName: finalName, timestamp: Date.now(), userId: currentUser.uid });
+                }
             } catch (err) {
                 console.error(err);
             }
