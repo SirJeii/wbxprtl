@@ -45,10 +45,24 @@
         <!-- USER PORTAL (Form & Result)                -->
         <!-- ========================================== -->
         <section id="user-section" class="panel">
+            
+            <!-- Portal Mode Switcher Tabs -->
+            <div class="portal-tabs-container" id="user-portal-tabs">
+                <button type="button" class="portal-tab-btn active" id="tab-user-prereg">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>Pre-Register</span>
+                </button>
+                <button type="button" class="portal-tab-btn" id="tab-user-quickjoin">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    <span>Quick Join</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: PRE-REGISTRATION CONTENT -->
             <div id="user-form-container">
                 <div class="panel-title-area">
-                    <h2 class="panel-title">Registration</h2>
-                    <p class="panel-subtitle">Fill out the details to generate your meeting name.</p>
+                    <h2 class="panel-title">Pre-Registration</h2>
+                    <p class="panel-subtitle">Fill out the details to pre-register and get your 6-digit code.</p>
                 </div>
 
                 <form id="user-form" style="display: flex; flex-direction: column; gap: 16px;">
@@ -100,12 +114,101 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="margin-top: 16px;">
-                        <span>Generate & Continue</span>
+                        <span>Pre-Register & Get Code</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
                 </form>
             </div>
 
+            <!-- Pre-Registration Closed State -->
+            <div id="prereg-closed-container" class="status-lock-card hidden">
+                <div class="status-lock-icon">
+                    <i data-lucide="calendar-off" class="w-7 h-7"></i>
+                </div>
+                <h3 class="status-lock-title">Pre-Registration is Closed</h3>
+                <p class="status-lock-text" id="prereg-closed-msg">
+                    Pre-registration is not currently active for this event.
+                </p>
+                <div style="margin-top: 8px; padding: 12px 16px; background-color: var(--color-bg-base); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: 0.875rem; text-align: left; width: 100%; max-width: 320px;">
+                    <div><strong>Opens:</strong> <span id="lbl-reg-start">-</span></div>
+                    <div style="margin-top: 6px;"><strong>Closes:</strong> <span id="lbl-reg-end">-</span></div>
+                </div>
+            </div>
+
+            <!-- Pre-Registration Success State (6-Digit Code) -->
+            <div id="prereg-success-container" class="hidden" style="text-align: center;">
+                <div class="success-icon-wrapper">
+                    <div class="success-icon-bg" style="background-color: var(--color-indigo-glow); color: var(--color-indigo);">
+                        <i data-lucide="shield-check" class="w-8 h-8"></i>
+                    </div>
+                    <div class="success-pulse" style="border-color: var(--color-indigo-glow);"></div>
+                </div>
+                <h2 class="panel-title" style="margin-bottom: 8px;">Registration Successful!</h2>
+                <p class="panel-subtitle" style="margin-bottom: 16px; padding: 0 16px;">Please copy and save your unique 6-digit Quick Join code below.</p>
+                
+                <div class="code-card-container">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--color-text-muted); letter-spacing: 0.05em;">Quick Join Code</div>
+                    <div class="code-value-display" id="lbl-generated-code">------</div>
+                    <p style="font-size: 0.8125rem; color: var(--color-text-muted); margin-top: 8px; line-height: 1.4;">
+                        Enter this code on the Quick Join tab starting 1 hour before the event to connect to WebEx.
+                    </p>
+                    <div style="margin-top: 12px; padding: 10px 12px; background-color: var(--color-indigo-glow); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--color-indigo); font-weight: 600; line-height: 1.4; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i data-lucide="info" class="w-4 h-4" style="flex-shrink: 0;"></i>
+                        <span>Please screenshot the code or paste it on your notes!</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto 16px auto;">
+                    <button id="btn-copy-code" class="btn btn-primary" style="background-color: var(--color-indigo); border-color: var(--color-indigo);">
+                        <i data-lucide="copy" class="w-4 h-4"></i> Copy Code
+                    </button>
+                    <button id="btn-goto-quickjoin" class="btn btn-secondary">
+                        Go to Quick Join
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: QUICK JOIN CONTENT -->
+            <div id="quickjoin-container" class="hidden">
+                <!-- Locked State (Countdown) -->
+                <div id="quickjoin-locked-state" class="status-lock-card">
+                    <div class="status-lock-icon info">
+                        <i data-lucide="clock" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="status-lock-title">Quick Join is Not Yet Active</h3>
+                    <p class="status-lock-text" style="max-width: 380px;">
+                        The Quick Join check-in portal will unlock exactly 1 hour before the event starts.
+                    </p>
+                    <div style="margin-top: 8px; padding: 12px 16px; background-color: var(--color-bg-base); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: 0.875rem; text-align: left; width: 100%; max-width: 320px;">
+                        <div><strong>Event Time:</strong> <span id="lbl-event-time">-</span></div>
+                        <div style="margin-top: 8px; font-weight: 700; color: var(--color-indigo);" id="lbl-countdown">Unlocks in: --:--:--</div>
+                    </div>
+                </div>
+
+                <!-- Active Input State -->
+                <div id="quickjoin-active-state" class="hidden">
+                    <div class="panel-title-area">
+                        <h2 class="panel-title">Quick Join Check-In</h2>
+                        <p class="panel-subtitle">Enter your 6-digit code to immediately retrieve details and connect.</p>
+                    </div>
+
+                    <form id="quickjoin-form" style="display: flex; flex-direction: column; gap: 16px; max-width: 380px; margin: 0 auto;">
+                        <div class="form-group" style="text-align: center;">
+                            <label for="inp-join-code" style="font-weight: 700; margin-bottom: 8px; font-size: 1rem; color: var(--color-text-title);">6-Digit Registration Code</label>
+                            <input required type="text" id="inp-join-code" class="input-field" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.5rem; font-family: var(--font-mono); letter-spacing: 0.15em; font-weight: 700; text-transform: uppercase;">
+                            <p id="join-error-msg" style="color: var(--color-danger); font-size: 0.875rem; margin-top: 8px; font-weight: 500;" class="hidden">
+                                <i data-lucide="alert-circle" class="w-4 h-4" style="vertical-align: middle; margin-right: 4px;"></i> Code not found. Verify code or register first.
+                            </p>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+                            <span>Verify & Join WebEx</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RESULT SCREEN -->
             <div id="user-result-container" class="hidden" style="text-align: center;">
                 <div class="success-icon-wrapper">
                     <div class="success-icon-bg">
@@ -113,8 +216,8 @@
                     </div>
                     <div class="success-pulse"></div>
                 </div>
-                <h2 class="panel-title" style="margin-bottom: 8px;">You're All Set!</h2>
-                <p class="panel-subtitle" style="margin-bottom: 24px;">Please copy your official name below before joining the WebEx room.</p>
+                <h2 class="panel-title" style="margin-bottom: 8px;">You're Checked In!</h2>
+                <p class="panel-subtitle" style="margin-bottom: 20px; padding: 0 16px;">Copy your official meeting name below before joining the WebEx room.</p>
 
                 <!-- Name Copy Box -->
                 <div class="copy-box">
@@ -127,13 +230,15 @@
                     </button>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 16px;">
+
+
+                <div style="display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 20px auto 0 auto;">
                     <a id="link-webex" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-success">
                         <i data-lucide="video" class="w-5 h-5"></i> Open WebEx Meeting
                     </a>
 
                     <button id="btn-back-form" class="btn btn-secondary">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Registration
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Return to Portal
                     </button>
                 </div>
             </div>
@@ -230,6 +335,27 @@
                             <input type="text" id="set-convention" required class="input-field" style="font-family: var(--font-mono); font-size: 0.9375rem;">
                         </div>
 
+                        <!-- Event Schedule & Registration Window Configuration -->
+                        <div class="config-card">
+                            <h3 class="config-card-title"><i data-lucide="calendar" class="w-5 h-5 text-indigo-600"></i> Event & Registration Schedule</h3>
+                            <p class="config-card-description">Set the dates for pre-registration availability and the scheduled event start. The Quick Join portal unlocks exactly 1 hour before the Event Start.</p>
+                            
+                            <div class="config-grid-3" style="margin-top: 16px;">
+                                <div class="form-group">
+                                    <label for="set-reg-start">Registration Open Date/Time *</label>
+                                    <input type="datetime-local" id="set-reg-start" required class="input-field">
+                                </div>
+                                <div class="form-group">
+                                    <label for="set-reg-end">Registration Close Date/Time *</label>
+                                    <input type="datetime-local" id="set-reg-end" required class="input-field">
+                                </div>
+                                <div class="form-group">
+                                    <label for="set-event-time">Event Start Date/Time *</label>
+                                    <input type="datetime-local" id="set-event-time" required class="input-field">
+                                </div>
+                            </div>
+                        </div>
+
                         <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                             <button type="submit" id="btn-save-settings" class="btn btn-primary" style="width: auto; padding: 12px 28px;">
                                 <i data-lucide="save" class="w-4 h-4"></i> Save Format
@@ -248,6 +374,32 @@
                         <button id="btn-save-all-lokals" class="btn btn-success" style="width: auto; padding: 10px 20px;">
                             <i data-lucide="save" class="w-5 h-5"></i> Save All Changes
                         </button>
+                    </div>
+
+                    <!-- General Link Configuration -->
+                    <div class="config-card" style="margin-bottom: 24px;">
+                        <h3 class="config-card-title"><i data-lucide="link-2" class="w-5 h-5 text-indigo-600"></i> General Meeting Link (Same for All Lokals)</h3>
+                        <p class="config-card-description">Enable this option if all Lokals share the same WebEx meeting details for this event. When enabled, individual Lokal links will be overridden.</p>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 14px; margin-bottom: 16px;">
+                            <input type="checkbox" id="set-use-general-link" style="width: 18px; height: 18px; cursor: pointer;">
+                            <label for="set-use-general-link" style="font-weight: 600; cursor: pointer; color: var(--color-text-title);">Use General Link for All Lokals</label>
+                        </div>
+                        
+                        <div class="lokal-inputs-grid" id="general-link-inputs-wrapper">
+                            <div>
+                                <label for="set-general-link">General WebEx Link (URL)</label>
+                                <input type="text" id="set-general-link" class="input-field" placeholder="https://...">
+                            </div>
+                            <div>
+                                <label for="set-general-num">General Meeting Number</label>
+                                <input type="text" id="set-general-num" class="input-field" placeholder="123 456 7890">
+                            </div>
+                            <div>
+                                <label for="set-general-pass">General Password</label>
+                                <input type="text" id="set-general-pass" class="input-field" placeholder="Password123">
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Add New Lokal Bulk Form -->
@@ -287,38 +439,43 @@
                 <div id="tab-reports" class="tab-content hidden">
                     <div class="tab-header">
                         <h2 class="tab-title">Join Logs</h2>
-                        <button id="btn-refresh-logs" class="btn btn-secondary" style="width: auto; padding: 8px;" title="Refresh logs">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        </button>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button id="btn-maximize-reports" class="btn btn-secondary" style="width: auto; padding: 8px;" title="Maximize view">
+                                <i id="icon-maximize-reports" data-lucide="maximize-2" class="w-4 h-4"></i>
+                            </button>
+                            <button id="btn-refresh-logs" class="btn btn-secondary" style="width: auto; padding: 8px;" title="Refresh logs">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Statistics Summary Widgets -->
                     <div class="widgets-grid">
                         <div class="widget-card">
-                            <div class="widget-icon-box primary">
-                                <i data-lucide="users" class="w-6 h-6"></i>
-                            </div>
-                            <div class="widget-info">
-                                <span id="widget-total-registrations" class="widget-value">0</span>
-                                <span class="widget-label">Total Logs</span>
-                            </div>
-                        </div>
-                        <div class="widget-card">
                             <div class="widget-icon-box indigo">
-                                <i data-lucide="map-pin" class="w-6 h-6"></i>
+                                <i data-lucide="user-plus" class="w-6 h-6"></i>
                             </div>
                             <div class="widget-info">
-                                <span id="widget-total-lokals" class="widget-value">0</span>
-                                <span class="widget-label">Active Lokals</span>
+                                <span id="widget-total-preregistered" class="widget-value">0</span>
+                                <span class="widget-label">Total Pre-Registered</span>
                             </div>
                         </div>
                         <div class="widget-card">
                             <div class="widget-icon-box success">
-                                <i data-lucide="clock" class="w-6 h-6"></i>
+                                <i data-lucide="user-check" class="w-6 h-6"></i>
                             </div>
                             <div class="widget-info">
-                                <span id="widget-last-updated" class="widget-value">-</span>
-                                <span class="widget-label">Last Log Time</span>
+                                <span id="widget-total-checkedin" class="widget-value">0</span>
+                                <span class="widget-label">Total Checked In</span>
+                            </div>
+                        </div>
+                        <div class="widget-card">
+                            <div class="widget-icon-box primary">
+                                <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                            </div>
+                            <div class="widget-info">
+                                <span id="widget-attendance-rate" class="widget-value">0%</span>
+                                <span class="widget-label">Attendance Rate</span>
                             </div>
                         </div>
                     </div>
@@ -327,9 +484,14 @@
                     <div class="toolbar">
                         <div class="search-bar-wrapper">
                             <i data-lucide="search" class="w-4 h-4"></i>
-                            <input type="text" id="logs-search" class="search-input" placeholder="Search Name or Lokal...">
+                            <input type="text" id="logs-search" class="search-input" placeholder="Search Name, Code or Lokal...">
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            <select id="logs-filter-status" class="search-input" style="padding-left: 12px; padding-right: 32px; max-width: 150px; appearance: none; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; cursor: pointer;" title="Filter by Status">
+                                <option value="">All Statuses</option>
+                                <option value="joined">Joined</option>
+                                <option value="pending">Pending/Absent</option>
+                            </select>
                             <select id="logs-filter-lokal" class="search-input" style="padding-left: 12px; padding-right: 32px; max-width: 180px; appearance: none; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; cursor: pointer;" title="Filter by Lokal">
                                 <option value="">All Lokals</option>
                             </select>
@@ -346,7 +508,7 @@
                                 <i data-lucide="download" class="w-4 h-4"></i> Export CSV
                             </button>
                             <button id="btn-delete-all-logs" class="btn btn-danger" style="padding: 10px 16px; font-size: 0.875rem; width: auto;">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i> Clear Logs
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> Clear Attendance/Pre-regs
                             </button>
                         </div>
                     </div>
@@ -357,16 +519,18 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Timestamp</th>
-                                        <th>Meeting Name</th>
-                                        <th>User Details</th>
+                                        <th style="width: 100px; text-align: center;">Code</th>
+                                        <th style="width: 120px;">Join Status</th>
+                                        <th>Checked In At</th>
+                                        <th>Official Meeting Name</th>
+                                        <th>Full Name</th>
                                         <th>Lokal Info</th>
                                         <th style="width: 80px; text-align: center;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="reports-table-body">
                                     <tr class="table-loading-row">
-                                        <td colspan="5">
+                                        <td colspan="7">
                                             <i data-lucide="loader" class="w-5 h-5" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Loading reports...
                                         </td>
                                     </tr>
@@ -489,17 +653,33 @@
         };
         let appLokals = [];
         let appReports = [];
+        let appPreRegistrations = [];
+        let activeUserMode = 'prereg';
+        let countdownTimerId = null;
         let isAdminAuthenticated = false;
         let selectedLokalName = "";
 
         const Views = { USER: 'user', ADMIN_LOGIN: 'admin_login', ADMIN_DASH: 'admin_dash' };
         let currentView = Views.USER;
 
-        function switchView(view) {
+         function switchView(view) {
             document.getElementById('user-section').classList.add('hidden');
             document.getElementById('admin-login-section').classList.add('hidden');
             document.getElementById('admin-dashboard-section').classList.add('hidden');
             document.getElementById('header-nav').classList.add('hidden');
+
+            // Reset maximized reports view if leaving dashboard
+            const tabEl = document.getElementById('tab-reports');
+            if (tabEl) {
+                tabEl.classList.remove('maximized');
+                const iconEl = document.getElementById('icon-maximize-reports');
+                const btnEl = document.getElementById('btn-maximize-reports');
+                if (iconEl && btnEl) {
+                    iconEl.setAttribute('data-lucide', 'maximize-2');
+                    btnEl.title = "Maximize view";
+                    btnEl.classList.remove('active');
+                }
+            }
 
             currentView = view;
             if (view === Views.USER) {
@@ -775,14 +955,165 @@
 
             const reportsRef = collection(db, 'artifacts', appId, 'public', 'data', 'join_logs');
             onSnapshot(reportsRef, (snap) => {
-                appReports = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                appReports = snap.docs.map(doc => ({ ...doc.data(), id: doc.id }));
                 appReports.sort((a, b) => b.timestamp - a.timestamp);
                 updateReportsUI();
+            });
+
+            const preregsRef = collection(db, 'artifacts', appId, 'public', 'data', 'pre_registrations');
+            onSnapshot(preregsRef, (snap) => {
+                appPreRegistrations = snap.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                updateReportsUI();
+                updatePortalUI();
+            }, (error) => {
+                console.error("Pre-registrations snapshot error:", error);
+            });
+        }
+
+        function updatePortalUI() {
+            // First, hide user sub-panels to avoid overlapping
+            document.getElementById('user-form-container').classList.add('hidden');
+            document.getElementById('prereg-closed-container').classList.add('hidden');
+            document.getElementById('prereg-success-container').classList.add('hidden');
+            document.getElementById('quickjoin-container').classList.add('hidden');
+            document.getElementById('quickjoin-locked-state').classList.add('hidden');
+            document.getElementById('quickjoin-active-state').classList.add('hidden');
+
+            const now = Date.now();
+            const regStart = appSettings.registrationStart ? parseInt(appSettings.registrationStart) : 0;
+            const regEnd = appSettings.registrationEnd ? parseInt(appSettings.registrationEnd) : 0;
+            const eventTime = appSettings.eventTime ? parseInt(appSettings.eventTime) : 0;
+
+            if (activeUserMode === 'prereg') {
+                document.getElementById('tab-user-prereg').classList.add('active');
+                document.getElementById('tab-user-quickjoin').classList.remove('active');
+
+                // Check registration window
+                const isRegOpen = now >= regStart && now <= regEnd;
+                if (isRegOpen) {
+                    document.getElementById('user-form-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('prereg-closed-container').classList.remove('hidden');
+                    const startStr = regStart ? new Date(regStart).toLocaleString() : 'Not Set';
+                    const endStr = regEnd ? new Date(regEnd).toLocaleString() : 'Not Set';
+                    document.getElementById('lbl-reg-start').textContent = startStr;
+                    document.getElementById('lbl-reg-end').textContent = endStr;
+                    
+                    let msg = "Pre-registration is not currently active.";
+                    if (now < regStart) {
+                        msg = "Pre-registration has not opened yet.";
+                    } else if (now > regEnd) {
+                        msg = "Pre-registration has closed.";
+                    }
+                    document.getElementById('prereg-closed-msg').textContent = msg;
+                }
+            } else {
+                document.getElementById('tab-user-quickjoin').classList.add('active');
+                document.getElementById('tab-user-prereg').classList.remove('active');
+
+                document.getElementById('quickjoin-container').classList.remove('hidden');
+
+                // Quick Join opens exactly 1 hour before event start time
+                const timeDiff = eventTime - now;
+                const quickJoinThreshold = 60 * 60 * 1000; // 1 hour (3600000ms)
+
+                if (timeDiff <= quickJoinThreshold) {
+                    document.getElementById('quickjoin-active-state').classList.remove('hidden');
+                    if (countdownTimerId) {
+                        clearInterval(countdownTimerId);
+                        countdownTimerId = null;
+                    }
+                } else {
+                    document.getElementById('quickjoin-locked-state').classList.remove('hidden');
+                    const eventStr = eventTime ? new Date(eventTime).toLocaleString() : 'Not Set';
+                    document.getElementById('lbl-event-time').textContent = eventStr;
+                    
+                    updateCountdown(eventTime);
+                    if (!countdownTimerId) {
+                        countdownTimerId = setInterval(() => {
+                            updateCountdown(eventTime);
+                        }, 1000);
+                    }
+                }
+            }
+        }
+
+        function updateCountdown(targetTime) {
+            const now = Date.now();
+            const diff = targetTime - now;
+            const unlockDiff = diff - (60 * 60 * 1000); // 1 hour threshold countdown
+
+            if (unlockDiff <= 0) {
+                document.getElementById('lbl-countdown').textContent = "Unlocked!";
+                updatePortalUI();
+                return;
+            }
+
+            const hrs = Math.floor(unlockDiff / (3600 * 1000));
+            const mins = Math.floor((unlockDiff % (3600 * 1000)) / (60 * 1000));
+            const secs = Math.floor((unlockDiff % (60 * 1000)) / 1000);
+
+            const pad = (num) => String(num).padStart(2, '0');
+            document.getElementById('lbl-countdown').textContent = `Unlocks in: ${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+        }
+
+        function toggleGeneralLinkInputs(isEnabled) {
+            const wrapper = document.getElementById('general-link-inputs-wrapper');
+            if (wrapper) {
+                const inputs = wrapper.querySelectorAll('input');
+                inputs.forEach(inp => {
+                    inp.disabled = !isEnabled;
+                    if (!isEnabled) {
+                        inp.style.opacity = '0.6';
+                        inp.style.backgroundColor = 'var(--color-bg-base)';
+                    } else {
+                        inp.style.opacity = '';
+                        inp.style.backgroundColor = '';
+                    }
+                });
+            }
+            
+            // Also update the individual cards
+            document.querySelectorAll('.lokal-item-card').forEach(card => {
+                card.querySelectorAll('.input-field').forEach(inp => {
+                    inp.disabled = isEnabled;
+                    if (isEnabled) {
+                        inp.style.opacity = '0.6';
+                        inp.style.backgroundColor = 'var(--color-bg-base)';
+                        inp.title = "Disabled: General Link is active";
+                    } else {
+                        inp.style.opacity = '';
+                        inp.style.backgroundColor = '';
+                        inp.title = '';
+                    }
+                });
             });
         }
 
         function updateSettingsUI() {
             document.getElementById('set-convention').value = appSettings.namingConvention || '';
+            
+            const formatForInput = (ts) => {
+                if (!ts) return '';
+                const d = new Date(ts);
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+            
+            document.getElementById('set-reg-start').value = formatForInput(appSettings.registrationStart);
+            document.getElementById('set-reg-end').value = formatForInput(appSettings.registrationEnd);
+            document.getElementById('set-event-time').value = formatForInput(appSettings.eventTime);
+            
+            const useGenCheck = document.getElementById('set-use-general-link');
+            if (useGenCheck) {
+                useGenCheck.checked = appSettings.useGeneralLink === true;
+                document.getElementById('set-general-link').value = appSettings.generalLink || '';
+                document.getElementById('set-general-num').value = appSettings.generalNumber || '';
+                document.getElementById('set-general-pass').value = appSettings.generalPassword || '';
+                toggleGeneralLinkInputs(appSettings.useGeneralLink === true);
+            }
+
+            updatePortalUI();
         }
 
         function updateLokalsUI() {
@@ -799,6 +1130,7 @@
             // Admin List render (Editable rows)
             const adminList = document.getElementById('admin-lokals-list');
             adminList.innerHTML = '';
+            const isGenActive = appSettings.useGeneralLink === true;
             if (appLokals.length === 0) {
                 adminList.innerHTML = '<p style="text-align: center; color: var(--color-text-muted); margin-top: 40px; font-weight: 500;">No Lokals added yet. Use the card above to add one.</p>';
             } else {
@@ -819,15 +1151,15 @@
                         <div class="lokal-inputs-grid">
                             <div>
                                 <label>WebEx Link (URL)</label>
-                                <input type="text" class="input-field inp-lokal-link" value="${escapeHtml(lokal.link || '')}" placeholder="https://...">
+                                <input type="text" class="input-field inp-lokal-link" value="${escapeHtml(lokal.link || '')}" placeholder="https://..." ${isGenActive ? 'disabled style="background-color: var(--color-bg-base); opacity: 0.6;" title="Disabled: General Link is active"' : ''}>
                             </div>
                             <div>
                                 <label>Meeting Number</label>
-                                <input type="text" class="input-field inp-lokal-num" value="${escapeHtml(lokal.number || '')}" placeholder="123 456 7890">
+                                <input type="text" class="input-field inp-lokal-num" value="${escapeHtml(lokal.number || '')}" placeholder="123 456 7890" ${isGenActive ? 'disabled style="background-color: var(--color-bg-base); opacity: 0.6;" title="Disabled: General Link is active"' : ''}>
                             </div>
                             <div>
                                 <label>Password</label>
-                                <input type="text" class="input-field inp-lokal-pass" value="${escapeHtml(lokal.password || '')}" placeholder="Password123">
+                                <input type="text" class="input-field inp-lokal-pass" value="${escapeHtml(lokal.password || '')}" placeholder="Password123" ${isGenActive ? 'disabled style="background-color: var(--color-bg-base); opacity: 0.6;" title="Disabled: General Link is active"' : ''}>
                             </div>
                         </div>
                     `;
@@ -857,49 +1189,123 @@
         }
 
         function updateReportsUI() {
-            document.getElementById('report-count').textContent = appReports.length;
-            document.getElementById('widget-total-registrations').textContent = appReports.length;
-            
-            if (appReports.length > 0 && appReports[0].timestamp) {
-                const lastDate = new Date(appReports[0].timestamp);
-                document.getElementById('widget-last-updated').textContent = lastDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            } else {
-                document.getElementById('widget-last-updated').textContent = '-';
-            }
+            // Find which codes have checked in
+            const checkInMap = new Map();
+            appReports.forEach(log => {
+                if (log.code) {
+                    checkInMap.set(log.code, log);
+                }
+            });
+
+            // Build list of display items
+            let displayItems = [];
+
+            // 1. Add all pre-registrations with their check-in status
+            appPreRegistrations.forEach(pr => {
+                const checkIn = checkInMap.get(pr.code);
+                displayItems.push({
+                    id: pr.id,
+                    code: pr.code,
+                    firstName: pr.firstName,
+                    surname: pr.surname,
+                    suffix: pr.suffix || '',
+                    lokal: pr.lokal,
+                    purok: pr.purok,
+                    grupo: pr.grupo,
+                    generatedName: checkIn ? checkIn.generatedName : `${pr.lokal} P${pr.purok}-G${pr.grupo} ${pr.surname.toUpperCase()}, ${pr.firstName} ${pr.suffix}`.trim(),
+                    status: checkIn ? 'joined' : 'pending',
+                    checkInTimestamp: checkIn ? checkIn.timestamp : null,
+                    checkInId: checkIn ? checkIn.id : null,
+                    preRegTimestamp: pr.timestamp || 0
+                });
+            });
+
+            // 2. Add any join logs that are NOT associated with any pre-registration (legacy logs)
+            appReports.forEach(log => {
+                if (!log.code || !appPreRegistrations.some(pr => pr.code === log.code)) {
+                    displayItems.push({
+                        id: 'legacy-' + log.id,
+                        code: log.code || 'LEGACY',
+                        firstName: log.firstName,
+                        surname: log.surname,
+                        suffix: log.suffix || '',
+                        lokal: log.lokal,
+                        purok: log.purok,
+                        grupo: log.grupo,
+                        generatedName: log.generatedName || '',
+                        status: 'joined',
+                        checkInTimestamp: log.timestamp || 0,
+                        checkInId: log.id,
+                        preRegTimestamp: 0
+                    });
+                }
+            });
+
+            // Sort: Checked in first (newest check-ins first), then newest pre-registrations
+            displayItems.sort((a, b) => {
+                const tsA = a.checkInTimestamp || a.preRegTimestamp || 0;
+                const tsB = b.checkInTimestamp || b.preRegTimestamp || 0;
+                return tsB - tsA;
+            });
+
+            // Update stats widgets
+            const totalPreRegistered = appPreRegistrations.length;
+            const totalCheckedIn = appReports.length;
+            const rate = totalPreRegistered > 0 ? Math.round((totalCheckedIn / totalPreRegistered) * 100) : 0;
+
+            document.getElementById('widget-total-preregistered').textContent = totalPreRegistered;
+            document.getElementById('widget-total-checkedin').textContent = totalCheckedIn;
+            document.getElementById('widget-attendance-rate').textContent = `${rate}%`;
+            document.getElementById('report-count').textContent = totalPreRegistered;
 
             const tbody = document.getElementById('reports-table-body');
             tbody.innerHTML = '';
-            
-            if (appReports.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No join logs available yet.</td></tr>';
+
+            if (displayItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No pre-registration or join logs available yet.</td></tr>';
                 return;
             }
-            
-            appReports.forEach(log => {
+
+            displayItems.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.dataset.name = `${log.firstName} ${log.surname} ${log.generatedName}`;
-                tr.dataset.lokal = log.lokal;
-                tr.dataset.timestamp = log.timestamp || 0;
-                
-                const dateObj = log.timestamp ? new Date(log.timestamp) : null;
-                const dateStr = dateObj ? `<div class="font-medium text-slate-800">${dateObj.toLocaleDateString()}</div><div class="timestamp-time">${dateObj.toLocaleTimeString()}</div>` : 'Unknown';
-                
+                tr.dataset.name = `${item.firstName} ${item.surname} ${item.generatedName}`;
+                tr.dataset.lokal = item.lokal;
+                tr.dataset.code = item.code;
+                tr.dataset.status = item.status;
+                tr.dataset.timestamp = item.checkInTimestamp || item.preRegTimestamp || 0;
+
+                const dateObj = item.checkInTimestamp ? new Date(item.checkInTimestamp) : null;
+                const checkInDateStr = dateObj ? `<div class="font-medium text-slate-800">${dateObj.toLocaleDateString()}</div><div class="timestamp-time">${dateObj.toLocaleTimeString()}</div>` : `<span style="color: var(--color-text-light); font-style: italic;">Not checked in</span>`;
+
+                let statusBadge = "";
+                if (item.status === 'joined') {
+                    if (item.preRegTimestamp > 0) {
+                        statusBadge = `<span class="badge-status joined" title="User pre-registered and successfully checked in"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Registered & Joined</span>`;
+                    } else {
+                        statusBadge = `<span class="badge-status legacy" title="User checked in directly without pre-registering"><i data-lucide="help-circle" class="w-3.5 h-3.5"></i> Joined (No Pre-Reg)</span>`;
+                    }
+                } else {
+                    statusBadge = `<span class="badge-status not-joined" title="User pre-registered but has not checked in/joined yet"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Absent / Not Joined</span>`;
+                }
+
                 tr.innerHTML = `
-                    <td class="td-timestamp" data-label="Timestamp">${dateStr}</td>
+                    <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--color-text-title);" data-label="Code">${escapeHtml(item.code)}</td>
+                    <td data-label="Join Status">${statusBadge}</td>
+                    <td class="td-timestamp" data-label="Checked In">${checkInDateStr}</td>
                     <td data-label="Meeting Name">
-                        <span class="td-generated-name">${escapeHtml(log.generatedName || '')}</span>
+                        <span class="td-generated-name" style="${item.status === 'pending' ? 'opacity: 0.6;' : ''}">${escapeHtml(item.generatedName || '')}</span>
                     </td>
                     <td data-label="User Details">
-                        <div class="td-user-fullname">${escapeHtml(log.firstName)} ${escapeHtml(log.surname)} ${escapeHtml(log.suffix || '')}</div>
+                        <div class="td-user-fullname">${escapeHtml(item.firstName)} ${escapeHtml(item.surname)} ${escapeHtml(item.suffix || '')}</div>
                     </td>
                     <td data-label="Lokal Info">
                         <div class="td-lokal-info">
-                            <span class="td-lokal-name">${escapeHtml(log.lokal)}</span>
-                            <span class="td-purok-grupo-badge">Purok ${log.purok} &bull; Grupo ${log.grupo}</span>
+                            <span class="td-lokal-name">${escapeHtml(item.lokal)}</span>
+                            <span class="td-purok-grupo-badge">Purok ${item.purok} &bull; Grupo ${item.grupo}</span>
                         </div>
                     </td>
                     <td data-label="Actions" style="text-align: center;">
-                        <button type="button" class="btn-remove-icon btn-delete-log" data-id="${log.id}" title="Delete Log">
+                        <button type="button" class="btn-remove-icon btn-delete-log" data-id="${item.id}" title="Delete Record">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </td>
@@ -908,7 +1314,6 @@
             });
             refreshIcons();
             
-            // Re-apply filters if inputs have values
             filterReports();
         }
 
@@ -918,6 +1323,17 @@
         document.getElementById('user-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
+            
+            // Guard: block registration if the registration window is closed
+            const now = Date.now();
+            const regStart = appSettings.registrationStart ? parseInt(appSettings.registrationStart) : 0;
+            const regEnd = appSettings.registrationEnd ? parseInt(appSettings.registrationEnd) : 0;
+            const isRegOpen = now >= regStart && now <= regEnd;
+            if (!isRegOpen) {
+                alert("Registration is currently closed.");
+                updatePortalUI();
+                return;
+            }
             
             const selectedLokal = document.getElementById('inp-lokal').value;
             if (!selectedLokal) {
@@ -937,54 +1353,137 @@
                 grupo: document.getElementById('inp-grupo').value,
             };
 
+            let code = "";
+            
+            // Retrieve-on-Duplicate: check if user already pre-registered to return their existing code
+            const existingPreReg = appPreRegistrations.find(pr => 
+                pr.firstName.toLowerCase().trim() === formData.firstName.toLowerCase().trim() &&
+                pr.surname.toLowerCase().trim() === formData.surname.toLowerCase().trim() &&
+                pr.lokal.toLowerCase().trim() === formData.lokal.toLowerCase().trim()
+            );
+
+            if (existingPreReg) {
+                code = existingPreReg.code;
+            } else {
+                // Generate a unique 6-digit code
+                let unique = false;
+                let attempts = 0;
+                while (!unique && attempts < 100) {
+                    code = String(Math.floor(100000 + Math.random() * 900000));
+                    if (!appPreRegistrations.some(pr => pr.code === code)) {
+                        unique = true;
+                    }
+                    attempts++;
+                }
+            }
+
+            try {
+                // Save to pre-registration collection in firestore
+                const preRegRef = doc(db, 'artifacts', appId, 'public', 'data', 'pre_registrations', code);
+                await setDoc(preRegRef, { ...formData, code, timestamp: Date.now() });
+
+                // Show success screen with code
+                document.getElementById('lbl-generated-code').textContent = code;
+                document.getElementById('user-form-container').classList.add('hidden');
+                document.getElementById('prereg-success-container').classList.remove('hidden');
+            } catch (err) {
+                console.error("Pre-registration write error:", err);
+                alert("Failed to pre-register. Please try again.");
+            }
+        });
+
+        // Quick Join Form Submit (Day of Event Check-In)
+        document.getElementById('quickjoin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const codeInput = document.getElementById('inp-join-code').value.trim();
+            const errorMsg = document.getElementById('join-error-msg');
+            errorMsg.classList.add('hidden');
+
+            const match = appPreRegistrations.find(pr => pr.code === codeInput);
+            if (!match) {
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Construct official generated meeting name
             let finalName = (appSettings.namingConvention || '[{lokal}] P{purok}-G{grupo} {surname}, {firstname} {suffix}')
-                .replace('{lokal}', formData.lokal).replace('{purok}', formData.purok).replace('{grupo}', formData.grupo)
-                .replace('{surname}', formData.surname.toUpperCase()).replace('{firstname}', formData.firstName)
-                .replace('{suffix}', formData.suffix ? ` ${formData.suffix}` : '');
+                .replace('{lokal}', match.lokal).replace('{purok}', match.purok).replace('{grupo}', match.grupo)
+                .replace('{surname}', match.surname.toUpperCase()).replace('{firstname}', match.firstName)
+                .replace('{suffix}', match.suffix ? ` ${match.suffix}` : '');
             finalName = finalName.replace(/\s+/g, ' ').trim();
 
             document.getElementById('display-generated-name').textContent = finalName;
 
             // Load Specific Lokal Config
-            const selectedLokalConfig = appLokals.find(l => l.name === formData.lokal) || {};
-            document.getElementById('link-webex').href = selectedLokalConfig.link || '#';
+            const selectedLokalConfig = appLokals.find(l => l.name === match.lokal) || {};
             
-            const numEl = document.getElementById('display-meeting-num');
-            const passEl = document.getElementById('display-meeting-pass');
-            if (numEl) numEl.textContent = selectedLokalConfig.number || 'N/A';
-            if (passEl) passEl.textContent = selectedLokalConfig.password || 'N/A';
+            const useGeneral = appSettings.useGeneralLink === true;
+            const finalLink = useGeneral ? appSettings.generalLink : selectedLokalConfig.link;
+            const finalNumber = useGeneral ? appSettings.generalNumber : selectedLokalConfig.number;
+            const finalPassword = useGeneral ? appSettings.generalPassword : selectedLokalConfig.password;
+
+            document.getElementById('link-webex').href = finalLink || '#';
 
             try {
-                const existingLog = appReports.find(log => 
-                    log.firstName && log.surname && log.lokal &&
-                    log.firstName.toLowerCase().trim() === formData.firstName.toLowerCase().trim() &&
-                    log.surname.toLowerCase().trim() === formData.surname.toLowerCase().trim() &&
-                    (log.suffix || '').toLowerCase().trim() === formData.suffix.toLowerCase().trim() &&
-                    log.lokal.toLowerCase().trim() === formData.lokal.toLowerCase().trim()
-                );
-
+                // Log attendance check-in to join_logs
+                const existingLog = appReports.find(log => log.code === match.code);
                 if (existingLog) {
                     const logDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', existingLog.id);
-                    await setDoc(logDocRef, { ...formData, generatedName: finalName, timestamp: Date.now(), userId: currentUser.uid });
+                    await setDoc(logDocRef, { ...match, generatedName: finalName, timestamp: Date.now(), userId: currentUser.uid });
                 } else {
                     const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'join_logs');
-                    await addDoc(logsRef, { ...formData, generatedName: finalName, timestamp: Date.now(), userId: currentUser.uid });
+                    await addDoc(logsRef, { ...match, generatedName: finalName, timestamp: Date.now(), userId: currentUser.uid });
                 }
             } catch (err) {
-                console.error(err);
+                console.error("Check-in log save error:", err);
             }
 
-            document.getElementById('user-form-container').classList.add('hidden');
+            document.getElementById('quickjoin-container').classList.add('hidden');
             document.getElementById('user-result-container').classList.remove('hidden');
+        });
+
+        // Toggle Tabs Event Listeners
+        document.getElementById('tab-user-prereg').addEventListener('click', () => {
+            activeUserMode = 'prereg';
+            document.getElementById('user-result-container').classList.add('hidden');
+            updatePortalUI();
+        });
+
+        document.getElementById('tab-user-quickjoin').addEventListener('click', () => {
+            activeUserMode = 'quickjoin';
+            document.getElementById('user-result-container').classList.add('hidden');
+            updatePortalUI();
+        });
+
+        document.getElementById('btn-copy-code').addEventListener('click', () => {
+            const txt = document.getElementById('lbl-generated-code').textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(txt).then(() => {
+                    showToast("Code copied to clipboard!");
+                }).catch(err => {
+                    fallbackCopy(txt);
+                });
+            } else {
+                fallbackCopy(txt);
+            }
+        });
+
+
+
+        document.getElementById('btn-goto-quickjoin').addEventListener('click', () => {
+            activeUserMode = 'quickjoin';
+            updatePortalUI();
         });
 
         document.getElementById('btn-back-form').addEventListener('click', () => {
             document.getElementById('user-result-container').classList.add('hidden');
-            document.getElementById('user-form-container').classList.remove('hidden');
             document.getElementById('text-copy').textContent = 'Copy Name';
             document.getElementById('btn-copy').classList.remove('copied');
             document.getElementById('icon-copy').setAttribute('data-lucide', 'copy');
             refreshIcons();
+            updatePortalUI();
         });
 
         document.getElementById('btn-close-reminder').addEventListener('click', () => {
@@ -1073,14 +1572,24 @@
             btn.disabled = true;
             refreshIcons();
 
+            const regStartVal = document.getElementById('set-reg-start').value;
+            const regEndVal = document.getElementById('set-reg-end').value;
+            const eventTimeVal = document.getElementById('set-event-time').value;
+
             try {
                 const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'webex_settings', 'main');
-                await setDoc(settingsRef, { namingConvention: document.getElementById('set-convention').value.trim() });
+                await setDoc(settingsRef, { 
+                    namingConvention: document.getElementById('set-convention').value.trim(),
+                    registrationStart: regStartVal ? new Date(regStartVal).getTime() : null,
+                    registrationEnd: regEndVal ? new Date(regEndVal).getTime() : null,
+                    eventTime: eventTimeVal ? new Date(eventTimeVal).getTime() : null
+                });
                 const succ = document.getElementById('settings-success');
                 succ.classList.remove('hidden');
                 setTimeout(() => succ.classList.add('hidden'), 3500);
             } catch (err) {
                 console.error(err);
+                alert("Error saving settings.");
             }
             btn.innerHTML = originalHTML;
             btn.disabled = false;
@@ -1155,9 +1664,23 @@
                 updatedList.push({ name: originalName, link, number, password });
             });
 
+            const useGeneralLink = document.getElementById('set-use-general-link').checked;
+            const generalLink = document.getElementById('set-general-link').value.trim();
+            const generalNumber = document.getElementById('set-general-num').value.trim();
+            const generalPassword = document.getElementById('set-general-pass').value.trim();
+
             try {
                 const lokalsRef = doc(db, 'artifacts', appId, 'public', 'data', 'lokals', 'list');
                 await setDoc(lokalsRef, { items: updatedList });
+
+                const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'webex_settings', 'main');
+                await setDoc(settingsRef, {
+                    ...appSettings,
+                    useGeneralLink,
+                    generalLink,
+                    generalNumber,
+                    generalPassword
+                });
 
                 const succ = document.getElementById('lokals-save-success');
                 succ.classList.remove('hidden');
@@ -1170,6 +1693,10 @@
             btn.innerHTML = origHTML;
             btn.disabled = false;
             refreshIcons();
+        });
+
+        document.getElementById('set-use-general-link').addEventListener('change', (e) => {
+            toggleGeneralLinkInputs(e.target.checked);
         });
 
         async function removeLokal(index) {
@@ -1207,6 +1734,7 @@
             const startVal = document.getElementById('logs-date-start').value;
             const endVal = document.getElementById('logs-date-end').value;
             const filterLokal = document.getElementById('logs-filter-lokal').value;
+            const filterStatus = document.getElementById('logs-filter-status').value;
             
             const startDate = startVal ? new Date(startVal + "T00:00:00") : null;
             const endDate = endVal ? new Date(endVal + "T23:59:59") : null;
@@ -1218,15 +1746,25 @@
             rows.forEach(row => {
                 const name = row.dataset.name ? row.dataset.name.toLowerCase() : '';
                 const lokal = row.dataset.lokal ? row.dataset.lokal : '';
+                const code = row.dataset.code ? row.dataset.code.toLowerCase() : '';
+                const status = row.dataset.status ? row.dataset.status : '';
                 const timestamp = parseInt(row.dataset.timestamp);
                 const rowDate = new Date(timestamp);
 
-                let matchesSearch = !query || name.includes(query) || lokal.toLowerCase().includes(query);
+                let matchesSearch = !query || name.includes(query) || lokal.toLowerCase().includes(query) || code.includes(query);
                 let matchesLokal = !filterLokal || lokal === filterLokal;
-                let matchesStart = !startDate || rowDate >= startDate;
-                let matchesEnd = !endDate || rowDate <= endDate;
+                let matchesStatus = !filterStatus || status === filterStatus;
+                
+                let matchesStart = true;
+                let matchesEnd = true;
+                if (timestamp > 0) {
+                    matchesStart = !startDate || rowDate >= startDate;
+                    matchesEnd = !endDate || rowDate <= endDate;
+                } else if (startDate || endDate) {
+                    matchesStart = false; // if date search is on, pending check-ins are excluded
+                }
 
-                if (matchesSearch && matchesLokal && matchesStart && matchesEnd) {
+                if (matchesSearch && matchesLokal && matchesStatus && matchesStart && matchesEnd) {
                     row.classList.remove('hidden');
                     visibleCount++;
                 } else {
@@ -1239,7 +1777,7 @@
                 if (!noLogsRow) {
                     const tr = document.createElement('tr');
                     tr.className = 'no-logs-row';
-                    tr.innerHTML = `<td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No logs match the filters.</td>`;
+                    tr.innerHTML = `<td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 40px;">No logs match the filters.</td>`;
                     tbody.appendChild(tr);
                 }
             } else if (noLogsRow) {
@@ -1252,50 +1790,144 @@
             const startVal = document.getElementById('logs-date-start').value;
             const endVal = document.getElementById('logs-date-end').value;
             const filterLokal = document.getElementById('logs-filter-lokal').value;
+            const filterStatus = document.getElementById('logs-filter-status').value;
             
             const startDate = startVal ? new Date(startVal + "T00:00:00") : null;
             const endDate = endVal ? new Date(endVal + "T23:59:59") : null;
 
-            return appReports.filter(log => {
-                const name = `${log.firstName} ${log.surname} ${log.generatedName}`.toLowerCase();
-                const lokal = log.lokal || '';
-                const logDate = log.timestamp ? new Date(log.timestamp) : new Date(0);
+            // Reconstruct displayItems
+            const checkInMap = new Map();
+            appReports.forEach(log => {
+                if (log.code) checkInMap.set(log.code, log);
+            });
 
-                let matchesSearch = !query || name.includes(query) || lokal.toLowerCase().includes(query);
+            let displayItems = [];
+            appPreRegistrations.forEach(pr => {
+                const checkIn = checkInMap.get(pr.code);
+                displayItems.push({
+                    code: pr.code,
+                    firstName: pr.firstName,
+                    surname: pr.surname,
+                    suffix: pr.suffix || '',
+                    lokal: pr.lokal,
+                    purok: pr.purok,
+                    grupo: pr.grupo,
+                    generatedName: checkIn ? checkIn.generatedName : `${pr.lokal} P${pr.purok}-G${pr.grupo} ${pr.surname.toUpperCase()}, ${pr.firstName} ${pr.suffix}`.trim(),
+                    status: checkIn ? 'joined' : 'pending',
+                    checkInTimestamp: checkIn ? checkIn.timestamp : null,
+                    preRegTimestamp: pr.timestamp || 0
+                });
+            });
+
+            appReports.forEach(log => {
+                if (!log.code || !appPreRegistrations.some(pr => pr.code === log.code)) {
+                    displayItems.push({
+                        code: log.code || 'LEGACY',
+                        firstName: log.firstName,
+                        surname: log.surname,
+                        suffix: log.suffix || '',
+                        lokal: log.lokal,
+                        purok: log.purok,
+                        grupo: log.grupo,
+                        generatedName: log.generatedName || '',
+                        status: 'joined',
+                        checkInTimestamp: log.timestamp || 0,
+                        preRegTimestamp: 0
+                    });
+                }
+            });
+
+            return displayItems.filter(item => {
+                const name = `${item.firstName} ${item.surname} ${item.generatedName}`.toLowerCase();
+                const lokal = item.lokal || '';
+                const code = item.code || '';
+                const status = item.status;
+                const timestamp = item.checkInTimestamp || 0;
+                const rowDate = new Date(timestamp);
+
+                let matchesSearch = !query || name.includes(query) || lokal.toLowerCase().includes(query) || code.includes(query);
                 let matchesLokal = !filterLokal || lokal === filterLokal;
-                let matchesStart = !startDate || logDate >= startDate;
-                let matchesEnd = !endDate || logDate <= endDate;
+                let matchesStatus = !filterStatus || status === filterStatus;
+                
+                let matchesStart = true;
+                let matchesEnd = true;
+                if (timestamp > 0) {
+                    matchesStart = !startDate || rowDate >= startDate;
+                    matchesEnd = !endDate || rowDate <= endDate;
+                } else if (startDate || endDate) {
+                    matchesStart = false;
+                }
 
-                return matchesSearch && matchesLokal && matchesStart && matchesEnd;
+                return matchesSearch && matchesLokal && matchesStatus && matchesStart && matchesEnd;
             });
         }
 
         async function deleteLog(id) {
             if (!currentUser) return;
-            if (!confirm("Are you sure you want to delete this log?")) return;
+            
+            // 1. Check legacy logs
+            if (id.startsWith('legacy-')) {
+                const checkInId = id.replace('legacy-', '');
+                if (!confirm("Are you sure you want to delete this legacy check-in attendance?")) return;
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', checkInId));
+                    showToast("Legacy check-in deleted!");
+                } catch (e) {
+                    console.error("Delete legacy check-in error:", e);
+                }
+                return;
+            }
 
-            try {
-                const logRef = doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', id);
-                await deleteDoc(logRef);
-                showToast("Log successfully deleted!");
-            } catch (err) {
-                console.error("Delete log error:", err);
-                alert("Failed to delete log.");
+            // 2. Otherwise it's a standard pre-registration code
+            const pr = appPreRegistrations.find(item => item.id === id);
+            if (!pr) return;
+
+            const checkIn = appReports.find(log => log.code === pr.code);
+
+            if (checkIn) {
+                // If they checked in, ask what they want to delete
+                const option = confirm(`User "${pr.firstName} ${pr.surname}" has already checked in.\n\nClick OK to DELETE ONLY their Day-of Check-In attendance (resets status to Pending).\nClick Cancel to DELETE their entire Pre-Registration & Code.`);
+                if (option) {
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', checkIn.id));
+                        showToast("Check-in attendance successfully deleted!");
+                    } catch(e) {
+                        console.error(e);
+                    }
+                } else {
+                    if (confirm(`Are you sure you want to delete the ENTIRE registration for "${pr.firstName} ${pr.surname}"? This deletes their code "${pr.code}" and attendance record.`)) {
+                        try {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', checkIn.id));
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pre_registrations', pr.code));
+                            showToast("Pre-registration deleted successfully!");
+                        } catch(e) {
+                            console.error(e);
+                        }
+                    }
+                }
+            } else {
+                // Not checked in, just delete pre-registration
+                if (confirm(`Are you sure you want to delete the pre-registration for "${pr.firstName} ${pr.surname}" (Code: ${pr.code})?`)) {
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pre_registrations', pr.code));
+                        showToast("Pre-registration deleted successfully!");
+                    } catch(e) {
+                        console.error(e);
+                    }
+                }
             }
         }
 
         async function deleteAllLogs() {
             if (!currentUser) return;
-            const filtered = getFilteredReports();
-            if (filtered.length === 0) {
-                alert("No logs available to delete.");
+            
+            const totalRecords = appPreRegistrations.length + appReports.length;
+            if (totalRecords === 0) {
+                alert("No records available to delete.");
                 return;
             }
 
-            const confirmMsg = document.getElementById('logs-search').value.trim() || document.getElementById('logs-date-start').value || document.getElementById('logs-date-end').value
-                ? `Are you sure you want to delete the ${filtered.length} FILTERED logs currently shown?`
-                : `Are you sure you want to delete ALL ${appReports.length} logs? This cannot be undone!`;
-
+            const confirmMsg = `Are you sure you want to delete ALL ${totalRecords} records (pre-registrations and check-ins)? This action cannot be undone!`;
             if (!confirm(confirmMsg)) return;
 
             const btn = document.getElementById('btn-delete-all-logs');
@@ -1304,16 +1936,41 @@
             btn.disabled = true;
             refreshIcons();
 
+            const promises = [];
+            const failedDeletes = [];
+
+            // delete all check-in logs
+            appReports.forEach(log => {
+                console.log("Attempting to delete join log:", log.id);
+                const p = deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', log.id))
+                    .catch(err => {
+                        console.error("Failed to delete join log:", log.id, err);
+                        failedDeletes.push(`Join Log (${log.id}): ${err.message || err}`);
+                    });
+                promises.push(p);
+            });
+
+            // delete all pre-registration documents
+            appPreRegistrations.forEach(pr => {
+                console.log("Attempting to delete pre-reg:", pr.id);
+                const p = deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pre_registrations', pr.id))
+                    .catch(err => {
+                        console.error("Failed to delete pre-reg:", pr.id, err);
+                        failedDeletes.push(`Pre-registration (${pr.id}): ${err.message || err}`);
+                    });
+                promises.push(p);
+            });
+
             try {
-                const deletePromises = filtered.map(log => {
-                    const logRef = doc(db, 'artifacts', appId, 'public', 'data', 'join_logs', log.id);
-                    return deleteDoc(logRef);
-                });
-                await Promise.all(deletePromises);
-                showToast("Logs successfully deleted!");
+                await Promise.all(promises);
+                if (failedDeletes.length > 0) {
+                    alert(`Failed to delete some records:\n\n${failedDeletes.join("\n")}`);
+                } else {
+                    showToast("All records successfully deleted!");
+                }
             } catch (err) {
-                console.error("Delete all logs error:", err);
-                alert("Failed to clear logs.");
+                console.error("Delete all records general error:", err);
+                alert("Failed to clear records: " + (err.message || err));
             }
 
             btn.innerHTML = origHTML;
@@ -1332,14 +1989,14 @@
             }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4'); // landscape, millimeters, A4 size
+            const doc = new jsPDF('l', 'mm', 'a4');
 
             // Group filtered records by Lokal
             const groups = {};
-            filtered.forEach(log => {
-                const lName = log.lokal || 'Unknown Lokal';
+            filtered.forEach(item => {
+                const lName = item.lokal || 'Unknown Lokal';
                 if (!groups[lName]) groups[lName] = [];
-                groups[lName].push(log);
+                groups[lName].push(item);
             });
 
             const sortedLokalNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
@@ -1348,43 +2005,69 @@
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(20);
             doc.setTextColor(30, 58, 138); // navy blue
-            doc.text("WebEx Join Portal - Attendance Summary", 14, 22);
+            doc.text("WebEx Join Portal - Attendance & Registration Summary", 14, 22);
 
             doc.setFont("Helvetica", "normal");
             doc.setFontSize(10);
             doc.setTextColor(100, 116, 139); // slate-500
             doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 30);
             doc.text(`Total Lokals: ${sortedLokalNames.length}`, 14, 35);
-            doc.text(`Total Attendees Joined: ${filtered.length}`, 14, 40);
+            doc.text(`Total Pre-registered: ${filtered.length}`, 14, 40);
+            const totalCheckedInSum = filtered.filter(x => x.status === 'joined').length;
+            doc.text(`Total Checked In: ${totalCheckedInSum} / ${filtered.length} (${filtered.length > 0 ? Math.round((totalCheckedInSum / filtered.length) * 100) : 0}%)`, 14, 45);
 
             // Summary Table Headers & Rows
-            const summaryHeaders = [["Lokal Name", "Total Attendees Joined"]];
-            const summaryData = sortedLokalNames.map(lokalName => [
-                lokalName,
-                groups[lokalName].length.toString()
-            ]);
+            const summaryHeaders = [["Lokal Name", "Purok Attendance Breakdown (Checked-In Only)", "Pre-Registered", "Checked In", "Attendance Rate"]];
+            const summaryData = sortedLokalNames.map(lokalName => {
+                const list = groups[lokalName];
+                const checkedInList = list.filter(x => x.status === 'joined');
+                
+                const purokCounts = {};
+                checkedInList.forEach(item => {
+                    const p = item.purok || 'N/A';
+                    purokCounts[p] = (purokCounts[p] || 0) + 1;
+                });
+                
+                const breakdownStr = Object.keys(purokCounts)
+                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .map(p => `Purok ${p}: ${purokCounts[p]} Joined`)
+                    .join(', ') || 'None';
+
+                const pct = list.length > 0 ? `${Math.round((checkedInList.length / list.length) * 100)}%` : '0%';
+
+                return [
+                    lokalName,
+                    breakdownStr,
+                    list.length.toString(),
+                    checkedInList.length.toString(),
+                    pct
+                ];
+            });
 
             doc.autoTable({
-                startY: 46,
+                startY: 52,
                 head: summaryHeaders,
                 body: summaryData,
                 theme: 'striped',
                 headStyles: {
-                    fillColor: [30, 58, 138], // primary dark blue
+                    fillColor: [30, 58, 138],
                     textColor: [255, 255, 255],
                     fontStyle: 'bold'
                 },
                 alternateRowStyles: {
-                    fillColor: [243, 244, 246] // light gray
+                    fillColor: [243, 244, 246]
                 },
                 styles: {
-                    fontSize: 10,
+                    fontSize: 9,
                     font: 'Helvetica',
                     cellPadding: 5
                 },
                 columnStyles: {
-                    0: { cellWidth: 150 }, // Lokal Name
-                    1: { cellWidth: 50, halign: 'center' } // Total Attendees Joined
+                    0: { cellWidth: 70 }, // Lokal Name
+                    1: { cellWidth: 110 }, // Breakdown
+                    2: { cellWidth: 30, halign: 'center' }, // Pre-Reg
+                    3: { cellWidth: 30, halign: 'center' }, // Checked In
+                    4: { cellWidth: 30, halign: 'center' }  // Rate
                 }
             });
 
@@ -1392,40 +2075,63 @@
             sortedLokalNames.forEach((lokalName) => {
                 doc.addPage();
 
-                // Header for this Lokal's section/page
                 doc.setFont("Helvetica", "bold");
                 doc.setFontSize(18);
-                doc.setTextColor(30, 58, 138); // navy blue
+                doc.setTextColor(30, 58, 138);
                 doc.text(`Lokal: ${lokalName}`, 14, 20);
 
                 doc.setFont("Helvetica", "normal");
                 doc.setFontSize(10);
-                doc.setTextColor(100, 116, 139); // slate-500
+                doc.setTextColor(100, 116, 139);
                 doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 26);
-                doc.text(`Total Attendees: ${groups[lokalName].length}`, 14, 31);
+                
+                const list = groups[lokalName];
+                const checkedInList = list.filter(x => x.status === 'joined');
+                doc.text(`Pre-registered: ${list.length}   |   Checked In: ${checkedInList.length} (${list.length > 0 ? Math.round((checkedInList.length / list.length) * 100) : 0}%)`, 14, 31);
 
-                // Table Headers & Rows for this specific Lokal (no need for Lokal Name column)
-                const headers = [["Timestamp", "Generated Meeting Name", "User Full Name", "Purok", "Grupo"]];
-                const data = groups[lokalName].map(log => [
-                    log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
-                    log.generatedName || '',
-                    `${log.firstName} ${log.surname} ${log.suffix || ''}`.trim(),
-                    log.purok || '',
-                    log.grupo || ''
+                const purokCounts = {};
+                checkedInList.forEach(item => {
+                    const p = item.purok || 'N/A';
+                    purokCounts[p] = (purokCounts[p] || 0) + 1;
+                });
+                const breakdownStr = Object.keys(purokCounts)
+                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .map(p => `Purok ${p}: ${purokCounts[p]} Joined`)
+                    .join('   ');
+
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(9);
+                doc.setTextColor(71, 85, 105);
+                const breakdownText = `Purok Breakdown (Checked-In): ${breakdownStr || 'None'}`;
+                const splitBreakdown = doc.splitTextToSize(breakdownText, 260);
+                doc.text(splitBreakdown, 14, 36);
+
+                const textHeight = splitBreakdown.length * 4;
+                const tableStartY = 36 + textHeight + 2;
+
+                const headers = [["Code", "Status", "Checked In Time", "Generated Meeting Name", "User Full Name", "Purok", "Grupo"]];
+                const data = list.map(item => [
+                    item.code || '',
+                    item.status.toUpperCase(),
+                    item.checkInTimestamp ? new Date(item.checkInTimestamp).toLocaleString() : 'PENDING/ABSENT',
+                    item.generatedName || '',
+                    `${item.firstName} ${item.surname} ${item.suffix || ''}`.trim(),
+                    item.purok || '',
+                    item.grupo || ''
                 ]);
 
                 doc.autoTable({
-                    startY: 36,
+                    startY: tableStartY,
                     head: headers,
                     body: data,
                     theme: 'striped',
                     headStyles: {
-                        fillColor: [30, 58, 138], // primary dark blue
+                        fillColor: [30, 58, 138],
                         textColor: [255, 255, 255],
                         fontStyle: 'bold'
                     },
                     alternateRowStyles: {
-                        fillColor: [243, 244, 246] // light gray
+                        fillColor: [243, 244, 246]
                     },
                     styles: {
                         fontSize: 9,
@@ -1433,24 +2139,26 @@
                         cellPadding: 4
                     },
                     columnStyles: {
-                        0: { cellWidth: 50 }, // Timestamp
-                        1: { cellWidth: 110 }, // Generated Meeting Name
-                        2: { cellWidth: 70 }, // User Full Name
-                        3: { cellWidth: 20, halign: 'center' }, // Purok
-                        4: { cellWidth: 20, halign: 'center' }  // Grupo
+                        0: { cellWidth: 20, halign: 'center' }, // Code
+                        1: { cellWidth: 25, halign: 'center' }, // Status
+                        2: { cellWidth: 45 },                  // Checked In Time
+                        3: { cellWidth: 90 },                  // Generated Name
+                        4: { cellWidth: 60 },                  // Full Name
+                        5: { cellWidth: 15, halign: 'center' }, // Purok
+                        6: { cellWidth: 15, halign: 'center' }  // Grupo
                     }
                 });
             });
 
-            // Add page numbers at the bottom of all pages
+            // Add page numbers
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
                 doc.setFont("Helvetica", "normal");
                 doc.setFontSize(8);
-                doc.setTextColor(100, 116, 139); // slate-500
+                doc.setTextColor(100, 116, 139);
                 doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
-                doc.text("WebEx Join Portal Attendance Report", 14, doc.internal.pageSize.height - 10);
+                doc.text("WebEx Join Portal Attendance & Registration Report", 14, doc.internal.pageSize.height - 10);
             }
 
             const today = new Date();
@@ -1466,7 +2174,7 @@
             doc.save(filename);
         });
 
-        // ZIP Export functionality (Individual PDFs per Lokal zipped + a Summary PDF)
+        // ZIP Export functionality
         document.getElementById('btn-export-zip').addEventListener('click', async () => {
             const filtered = getFilteredReports();
             if (filtered.length === 0) {
@@ -1484,12 +2192,11 @@
                 const { jsPDF } = window.jspdf;
                 const zip = new JSZip();
 
-                // Group filtered records by Lokal
                 const groups = {};
-                filtered.forEach(log => {
-                    const lName = log.lokal || 'Unknown Lokal';
+                filtered.forEach(item => {
+                    const lName = item.lokal || 'Unknown Lokal';
                     if (!groups[lName]) groups[lName] = [];
-                    groups[lName].push(log);
+                    groups[lName].push(item);
                 });
 
                 const today = new Date();
@@ -1500,57 +2207,82 @@
 
                 const sortedLokalNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
 
-                // 1. Generate and add a separate Summary PDF to the ZIP archive
+                // 1. Summary PDF
                 const summaryDoc = new jsPDF('l', 'mm', 'a4');
                 summaryDoc.setFont("Helvetica", "bold");
                 summaryDoc.setFontSize(20);
-                summaryDoc.setTextColor(30, 58, 138); // navy blue
-                summaryDoc.text("WebEx Join Portal - Attendance Summary", 14, 22);
+                summaryDoc.setTextColor(30, 58, 138);
+                summaryDoc.text("WebEx Join Portal - Attendance & Registration Summary", 14, 22);
 
                 summaryDoc.setFont("Helvetica", "normal");
                 summaryDoc.setFontSize(10);
-                summaryDoc.setTextColor(100, 116, 139); // slate-500
+                summaryDoc.setTextColor(100, 116, 139);
                 summaryDoc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 30);
                 summaryDoc.text(`Total Lokals: ${sortedLokalNames.length}`, 14, 35);
-                summaryDoc.text(`Total Attendees Joined: ${filtered.length}`, 14, 40);
+                summaryDoc.text(`Total Pre-registered: ${filtered.length}`, 14, 40);
+                const totalCheckedInSum = filtered.filter(x => x.status === 'joined').length;
+                summaryDoc.text(`Total Checked In: ${totalCheckedInSum} / ${filtered.length} (${filtered.length > 0 ? Math.round((totalCheckedInSum / filtered.length) * 100) : 0}%)`, 14, 45);
 
-                const summaryHeaders = [["Lokal Name", "Total Attendees Joined"]];
-                const summaryData = sortedLokalNames.map(lokalName => [
-                    lokalName,
-                    groups[lokalName].length.toString()
-                ]);
+                const summaryHeaders = [["Lokal Name", "Purok Attendance Breakdown (Checked-In Only)", "Pre-Registered", "Checked In", "Attendance Rate"]];
+                const summaryData = sortedLokalNames.map(lokalName => {
+                    const list = groups[lokalName];
+                    const checkedInList = list.filter(x => x.status === 'joined');
+                    
+                    const purokCounts = {};
+                    checkedInList.forEach(item => {
+                        const p = item.purok || 'N/A';
+                        purokCounts[p] = (purokCounts[p] || 0) + 1;
+                    });
+                    
+                    const breakdownStr = Object.keys(purokCounts)
+                        .sort((a, b) => parseInt(a) - parseInt(b))
+                        .map(p => `Purok ${p}: ${purokCounts[p]} Joined`)
+                        .join(', ') || 'None';
+
+                    const pct = list.length > 0 ? `${Math.round((checkedInList.length / list.length) * 100)}%` : '0%';
+
+                    return [
+                        lokalName,
+                        breakdownStr,
+                        list.length.toString(),
+                        checkedInList.length.toString(),
+                        pct
+                    ];
+                });
 
                 summaryDoc.autoTable({
-                    startY: 46,
+                    startY: 52,
                     head: summaryHeaders,
                     body: summaryData,
                     theme: 'striped',
                     headStyles: {
-                        fillColor: [30, 58, 138], // primary dark blue
+                        fillColor: [30, 58, 138],
                         textColor: [255, 255, 255],
                         fontStyle: 'bold'
                     },
                     alternateRowStyles: {
-                        fillColor: [243, 244, 246] // light gray
+                        fillColor: [243, 244, 246]
                     },
                     styles: {
-                        fontSize: 10,
+                        fontSize: 9,
                         font: 'Helvetica',
                         cellPadding: 5
                     },
                     columnStyles: {
-                        0: { cellWidth: 150 }, // Lokal Name
-                        1: { cellWidth: 50, halign: 'center' } // Total Attendees Joined
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 110 },
+                        2: { cellWidth: 30, halign: 'center' },
+                        3: { cellWidth: 30, halign: 'center' },
+                        4: { cellWidth: 30, halign: 'center' }
                     }
                 });
 
-                // Add footer page numbers for the summary document
                 const summaryPageCount = summaryDoc.internal.getNumberOfPages();
                 for (let i = 1; i <= summaryPageCount; i++) {
                     summaryDoc.setPage(i);
                     summaryDoc.setFont("Helvetica", "normal");
                     summaryDoc.setFontSize(8);
-                    summaryDoc.setTextColor(100, 116, 139); // slate-500
+                    summaryDoc.setTextColor(100, 116, 139);
                     summaryDoc.text(`Page ${i} of ${summaryPageCount}`, summaryDoc.internal.pageSize.width - 25, summaryDoc.internal.pageSize.height - 10);
                     summaryDoc.text("WebEx Join Portal Attendance Summary Report", 14, summaryDoc.internal.pageSize.height - 10);
                 }
@@ -1558,44 +2290,67 @@
                 const summaryPdfBlob = summaryDoc.output('blob');
                 zip.file(`INCFH-${dateStr}-Summary.pdf`, summaryPdfBlob);
 
-                // 2. Generate individual PDFs per Lokal and add to ZIP
+                // 2. Individual PDFs per Lokal
                 sortedLokalNames.forEach(lokalName => {
-                    const doc = new jsPDF('l', 'mm', 'a4'); // landscape, A4
+                    const doc = new jsPDF('l', 'mm', 'a4');
 
-                    // Header for this Lokal's PDF
                     doc.setFont("Helvetica", "bold");
                     doc.setFontSize(18);
-                    doc.setTextColor(30, 58, 138); // navy blue
+                    doc.setTextColor(30, 58, 138);
                     doc.text(`Lokal: ${lokalName}`, 14, 20);
 
                     doc.setFont("Helvetica", "normal");
                     doc.setFontSize(10);
-                    doc.setTextColor(100, 116, 139); // slate-500
+                    doc.setTextColor(100, 116, 139);
                     doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 26);
-                    doc.text(`Total Attendees: ${groups[lokalName].length}`, 14, 31);
+                    
+                    const list = groups[lokalName];
+                    const checkedInList = list.filter(x => x.status === 'joined');
+                    doc.text(`Pre-registered: ${list.length}   |   Checked In: ${checkedInList.length} (${list.length > 0 ? Math.round((checkedInList.length / list.length) * 100) : 0}%)`, 14, 31);
 
-                    // Table Headers & Rows for this specific Lokal (no need for Lokal Name column)
-                    const headers = [["Timestamp", "Generated Meeting Name", "User Full Name", "Purok", "Grupo"]];
-                    const data = groups[lokalName].map(log => [
-                        log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
-                        log.generatedName || '',
-                        `${log.firstName} ${log.surname} ${log.suffix || ''}`.trim(),
-                        log.purok || '',
-                        log.grupo || ''
+                    const purokCounts = {};
+                    checkedInList.forEach(item => {
+                        const p = item.purok || 'N/A';
+                        purokCounts[p] = (purokCounts[p] || 0) + 1;
+                    });
+                    const breakdownStr = Object.keys(purokCounts)
+                        .sort((a, b) => parseInt(a) - parseInt(b))
+                        .map(p => `Purok ${p}: ${purokCounts[p]} Joined`)
+                        .join('   ');
+
+                    doc.setFont("Helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.setTextColor(71, 85, 105);
+                    const breakdownText = `Purok Breakdown (Checked-In): ${breakdownStr || 'None'}`;
+                    const splitBreakdown = doc.splitTextToSize(breakdownText, 260);
+                    doc.text(splitBreakdown, 14, 36);
+
+                    const textHeight = splitBreakdown.length * 4;
+                    const tableStartY = 36 + textHeight + 2;
+
+                    const headers = [["Code", "Status", "Checked In Time", "Generated Meeting Name", "User Full Name", "Purok", "Grupo"]];
+                    const data = list.map(item => [
+                        item.code || '',
+                        item.status.toUpperCase(),
+                        item.checkInTimestamp ? new Date(item.checkInTimestamp).toLocaleString() : 'PENDING/ABSENT',
+                        item.generatedName || '',
+                        `${item.firstName} ${item.surname} ${item.suffix || ''}`.trim(),
+                        item.purok || '',
+                        item.grupo || ''
                     ]);
 
                     doc.autoTable({
-                        startY: 36,
+                        startY: tableStartY,
                         head: headers,
                         body: data,
                         theme: 'striped',
                         headStyles: {
-                            fillColor: [30, 58, 138], // primary dark blue
+                            fillColor: [30, 58, 138],
                             textColor: [255, 255, 255],
                             fontStyle: 'bold'
                         },
                         alternateRowStyles: {
-                            fillColor: [243, 244, 246] // light gray
+                            fillColor: [243, 244, 246]
                         },
                         styles: {
                             fontSize: 9,
@@ -1603,33 +2358,32 @@
                             cellPadding: 4
                         },
                         columnStyles: {
-                            0: { cellWidth: 50 }, // Timestamp
-                            1: { cellWidth: 110 }, // Generated Meeting Name
-                            2: { cellWidth: 70 }, // User Full Name
-                            3: { cellWidth: 20, halign: 'center' }, // Purok
-                            4: { cellWidth: 20, halign: 'center' }  // Grupo
+                            0: { cellWidth: 20, halign: 'center' },
+                            1: { cellWidth: 25, halign: 'center' },
+                            2: { cellWidth: 45 },
+                            3: { cellWidth: 90 },
+                            4: { cellWidth: 60 },
+                            5: { cellWidth: 15, halign: 'center' },
+                            6: { cellWidth: 15, halign: 'center' }
                         }
                     });
 
-                    // Add page numbers at the bottom of all pages for this specific Lokal PDF
                     const pageCount = doc.internal.getNumberOfPages();
                     for (let i = 1; i <= pageCount; i++) {
                         doc.setPage(i);
                         doc.setFont("Helvetica", "normal");
                         doc.setFontSize(8);
-                        doc.setTextColor(100, 116, 139); // slate-500
+                        doc.setTextColor(100, 116, 139);
                         doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
                         doc.text("WebEx Join Portal Attendance Report", 14, doc.internal.pageSize.height - 10);
                     }
 
-                    // Output as Blob
                     const pdfBlob = doc.output('blob');
                     const cleanLokalName = lokalName.replace(/\s+/g, '_');
                     zip.file(`INCFH-${dateStr}-${cleanLokalName}-Attendance.pdf`, pdfBlob);
                 });
 
                 const content = await zip.generateAsync({ type: "blob" });
-                
                 const url = URL.createObjectURL(content);
                 const link = document.createElement("a");
                 link.href = url;
@@ -1664,8 +2418,28 @@
 
         document.getElementById('logs-search').addEventListener('input', filterReports);
         document.getElementById('logs-filter-lokal').addEventListener('change', filterReports);
+        document.getElementById('logs-filter-status').addEventListener('change', filterReports);
         document.getElementById('logs-date-start').addEventListener('change', filterReports);
         document.getElementById('logs-date-end').addEventListener('change', filterReports);
+
+        document.getElementById('btn-maximize-reports').addEventListener('click', () => {
+            const tabEl = document.getElementById('tab-reports');
+            const iconEl = document.getElementById('icon-maximize-reports');
+            const btnEl = document.getElementById('btn-maximize-reports');
+            
+            tabEl.classList.toggle('maximized');
+            
+            if (tabEl.classList.contains('maximized')) {
+                iconEl.setAttribute('data-lucide', 'minimize-2');
+                btnEl.title = "Minimize view";
+                btnEl.classList.add('active');
+            } else {
+                iconEl.setAttribute('data-lucide', 'maximize-2');
+                btnEl.title = "Maximize view";
+                btnEl.classList.remove('active');
+            }
+            refreshIcons();
+        });
 
         document.getElementById('btn-refresh-logs').addEventListener('click', () => {
             const btn = document.getElementById('btn-refresh-logs');
@@ -1676,30 +2450,32 @@
                 btn.style.transition = 'none';
             }, 500);
             
-            // Re-fetch snapshots or just refresh UI
             updateReportsUI();
             showToast("Logs refreshed!");
         });
 
         // CSV Export functionality
         document.getElementById('btn-export-csv').addEventListener('click', () => {
-            if (appReports.length === 0) {
+            const filtered = getFilteredReports();
+            if (filtered.length === 0) {
                 alert("No reports available to export.");
                 return;
             }
             
-            let csv = "Timestamp,Meeting Name,First Name,Surname,Suffix,Lokal,Purok,Grupo\n";
-            appReports.forEach(log => {
-                const date = log.timestamp ? new Date(log.timestamp).toISOString() : '';
+            let csv = "Code,Join Status,Checked In At,Generated Name,First Name,Surname,Suffix,Lokal,Purok,Grupo\n";
+            filtered.forEach(item => {
+                const date = item.checkInTimestamp ? new Date(item.checkInTimestamp).toISOString() : 'Pending';
                 const row = [
+                    item.code || '',
+                    item.status || '',
                     date,
-                    log.generatedName || '',
-                    log.firstName || '',
-                    log.surname || '',
-                    log.suffix || '',
-                    log.lokal || '',
-                    log.purok || '',
-                    log.grupo || ''
+                    item.generatedName || '',
+                    item.firstName || '',
+                    item.surname || '',
+                    item.suffix || '',
+                    item.lokal || '',
+                    item.purok || '',
+                    item.grupo || ''
                 ].map(val => `"${val.replace(/"/g, '""')}"`).join(',');
                 csv += row + "\n";
             });
@@ -1709,7 +2485,7 @@
             if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
-                link.setAttribute("download", `join_logs_${Date.now()}.csv`);
+                link.setAttribute("download", `attendance_report_${Date.now()}.csv`);
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();

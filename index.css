@@ -1640,3 +1640,168 @@ td {
     }
 }
 
+/* ========================================== */
+/* PRE-REGISTRATION & QUICK JOIN ADDITIONS    */
+/* ========================================== */
+
+/* Segment Control / Mode Switcher Tabs */
+.portal-tabs-container {
+    display: flex;
+    background-color: var(--color-bg-sidebar);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    border: 1px solid var(--color-border);
+}
+
+.portal-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.portal-tab-btn:hover {
+    color: var(--color-text-title);
+}
+
+.portal-tab-btn.active {
+    color: var(--color-primary-hover);
+    background-color: var(--color-bg-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 6-Digit Code Display Card */
+.code-card-container {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(59, 130, 246, 0.03));
+    border: 2px dashed var(--color-indigo);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.code-value-display {
+    font-family: var(--font-mono);
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--color-indigo);
+    letter-spacing: 0.25em;
+    padding-left: 0.25em; /* offsets last char spacing */
+    margin: 12px 0;
+    text-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Warnings and Status Overlays */
+.status-lock-card {
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-lock-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--color-danger-glow);
+    color: var(--color-danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-lock-icon.info {
+    background-color: var(--color-primary-glow);
+    color: var(--color-primary);
+}
+
+.status-lock-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-title);
+}
+
+.status-lock-text {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+/* Status Badges */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-status.joined {
+    background-color: var(--color-success-glow);
+    color: var(--color-success-hover);
+}
+
+.badge-status.pending {
+    background-color: var(--color-bg-sidebar);
+    color: var(--color-text-muted);
+}
+
+.badge-status.not-joined {
+    background-color: var(--color-danger-glow);
+    color: var(--color-danger-hover);
+}
+
+.badge-status.legacy {
+    background-color: var(--color-primary-glow);
+    color: var(--color-primary);
+}
+
+/* Maximized Reports Tab View */
+#tab-reports.maximized {
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-bg-base);
+    z-index: 80;
+    padding: 32px 40px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#tab-reports.maximized .widgets-grid {
+    margin-bottom: 8px;
+}
+
+#tab-reports.maximized .table-scroll {
+    max-height: calc(100vh - 350px);
+}
+
+/* Grid extension for setups */
+.config-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
